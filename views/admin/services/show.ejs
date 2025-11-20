@@ -1,0 +1,41 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-eye"></i> View Service</h2>
+    <div>
+        <a href="/admin/services/<%= service._id %>/edit" class="btn btn-primary">
+            <i class="bi bi-pencil"></i> Edit
+        </a>
+        <a href="/admin/services" class="btn btn-outline-secondary">Back</a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-8">
+                <h3><%= service.name %></h3>
+                <p class="text-muted">Slug: /<%= service.slug %></p>
+                <p><%= service.description %></p>
+
+                <div class="mb-3">
+                    <strong>Base Price:</strong> <%= service.basePrice ? '$' + service.basePrice.toFixed(2) : 'Not specified' %>
+                </div>
+
+                <div class="mb-3">
+                    <strong>Status:</strong>
+                    <span class="badge bg-<%= service.status === 'published' ? 'success' : 'secondary' %>">
+                        <%= service.status %>
+                    </span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <% if (service.mainImage) { %>
+                    <div class="mb-3">
+                        <strong>Main Image:</strong>
+                        <img src="/admin/media/image/<%= service.mainImage._id %>/large" class="img-fluid rounded mt-2">
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</div>
+

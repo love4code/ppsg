@@ -1,0 +1,54 @@
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-8">
+            <h1 class="mb-3"><%= project.title %></h1>
+            
+            <% if (project.mainImage) { %>
+                <img src="/admin/media/image/<%= project.mainImage._id %>/large" class="img-fluid rounded mb-4" alt="<%= project.title %>">
+            <% } %>
+
+            <div class="mb-4">
+                <p class="lead"><%= project.description %></p>
+            </div>
+
+            <% if (project.location) { %>
+                <p><strong>Location:</strong> <%= project.location %></p>
+            <% } %>
+
+            <% if (project.date) { %>
+                <p><strong>Date:</strong> <%= new Date(project.date).toLocaleDateString() %></p>
+            <% } %>
+
+            <% if (project.tags && project.tags.length > 0) { %>
+                <div class="mb-4">
+                    <strong>Tags:</strong>
+                    <% project.tags.forEach(tag => { %>
+                        <span class="badge bg-secondary me-1"><%= tag %></span>
+                    <% }); %>
+                </div>
+            <% } %>
+
+            <% if (project.gallery && project.gallery.length > 0) { %>
+                <h3 class="mt-5 mb-3">Gallery</h3>
+                <div class="row g-3">
+                    <% project.gallery.forEach(image => { %>
+                        <div class="col-md-6">
+                            <img src="/admin/media/image/<%= image._id %>/medium" class="img-fluid rounded" alt="Gallery image">
+                        </div>
+                    <% }); %>
+                </div>
+            <% } %>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5>Project Information</h5>
+                    <hr>
+                    <p><strong>Status:</strong> <%= project.status %></p>
+                    <a href="/projects" class="btn btn-primary w-100">Back to Projects</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

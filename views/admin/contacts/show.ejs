@@ -1,0 +1,62 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-envelope"></i> Contact Details</h2>
+    <a href="/admin/contacts" class="btn btn-outline-secondary">Back to Contacts</a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <strong>Name:</strong> <%= contact.name %>
+            </div>
+            <div class="col-md-6">
+                <strong>Email:</strong> <a href="mailto:<%= contact.email %>"><%= contact.email %></a>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <strong>Phone:</strong> <%= contact.phone || 'Not provided' %>
+            </div>
+            <div class="col-md-6">
+                <strong>Status:</strong>
+                <span class="badge bg-<%= contact.status === 'new' ? 'danger' : 'success' %>">
+                    <%= contact.status %>
+                </span>
+            </div>
+        </div>
+
+        <% if (contact.reason) { %>
+            <div class="mb-3">
+                <strong>Reason for Contact:</strong> <%= contact.reason %>
+            </div>
+        <% } %>
+
+        <div class="mb-3">
+            <strong>Date:</strong> <%= new Date(contact.createdAt).toLocaleString() %>
+        </div>
+
+        <div class="mb-3">
+            <strong>Message:</strong>
+            <div class="card bg-light p-3 mt-2">
+                <%= contact.message.replace(/\n/g, '<br>') %>
+            </div>
+        </div>
+
+        <div class="d-flex gap-2">
+            <form action="/admin/contacts/<%= contact._id %>/status?_method=PUT" method="POST" class="d-inline">
+                <input type="hidden" name="status" value="<%= contact.status === 'new' ? 'read' : 'new' %>">
+                <button type="submit" class="btn btn-<%= contact.status === 'new' ? 'success' : 'warning' %>">
+                    <i class="bi bi-<%= contact.status === 'new' ? 'check' : 'arrow-counterclockwise' %>"></i>
+                    Mark as <%= contact.status === 'new' ? 'Read' : 'New' %>
+                </button>
+            </form>
+            <form action="/admin/contacts/<%= contact._id %>?_method=DELETE" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this contact?');">
+                <button type="submit" class="btn btn-danger">
+                    <i class="bi bi-trash"></i> Delete
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+

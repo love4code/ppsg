@@ -1,0 +1,50 @@
+<div class="container py-5">
+    <h1 class="mb-4">Our Products</h1>
+    
+    <% if (products.length > 0) { %>
+        <div class="row g-4">
+            <% products.forEach(product => { %>
+                <div class="col-md-4">
+                    <div class="card h-100 shadow-sm">
+                        <% if (product.mainImage) { %>
+                            <img src="/admin/media/image/<%= product.mainImage._id %>/medium" class="card-img-top" alt="<%= product.name %>" style="height: 250px; object-fit: cover;">
+                        <% } %>
+                        <div class="card-body">
+                            <h5 class="card-title"><%= product.name %></h5>
+                            <p class="card-text text-muted"><%= product.description.substring(0, 100) %>...</p>
+                            <p class="text-primary fw-bold fs-4 mb-3">$<%= product.price.toFixed(2) %></p>
+                            <a href="/products/<%= product.slug %>" class="btn btn-primary">View Product</a>
+                        </div>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+
+        <% if (totalPages > 1) { %>
+            <nav class="mt-5">
+                <ul class="pagination justify-content-center">
+                    <% if (currentPage > 1) { %>
+                        <li class="page-item">
+                            <a class="page-link" href="?page=<%= currentPage - 1 %>">Previous</a>
+                        </li>
+                    <% } %>
+                    <% for (let i = 1; i <= totalPages; i++) { %>
+                        <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                            <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                        </li>
+                    <% } %>
+                    <% if (currentPage < totalPages) { %>
+                        <li class="page-item">
+                            <a class="page-link" href="?page=<%= currentPage + 1 %>">Next</a>
+                        </li>
+                    <% } %>
+                </ul>
+            </nav>
+        <% } %>
+    <% } else { %>
+        <div class="alert alert-info">
+            <p class="mb-0">No products available at this time. Please check back later.</p>
+        </div>
+    <% } %>
+</div>
+
