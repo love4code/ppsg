@@ -1,0 +1,114 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-box"></i> Products</h2>
+    <a href="/admin/products/create" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> New Product
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="GET" class="mb-3">
+            <div class="row g-2">
+                <div class="col-md-5">
+                    <input type="text" class="form-control" name="search" placeholder="Search products..." value="<%= search || '' %>">
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" name="status">
+                        <option value="">All Statuses</option>
+                        <option value="published" <%= statusFilter === 'published' ? 'selected' : '' %>>Published</option>
+                        <option value="draft" <%= statusFilter === 'draft' ? 'selected' : '' %>>Draft</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-outline-primary">
+                        <i class="bi bi-search"></i> Filter
+                    </button>
+                    <a href="/admin/products" class="btn btn-outline-secondary">Clear</a>
+                </div>
+            </div>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Price</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (products.length > 0) { %>
+                        <% products.forEach(product => { %>
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <% if (product.mainImage) { %>
+                                            <img src="/admin/media/image/<%= product.mainImage._id %>/small" class="me-2" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
+                                        <% } %>
+                                        <div>
+                                            <strong><%= product.name %></strong>
+                                            <br>
+                                            <small class="text-muted">/<%= product.slug %></small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>$<%= product.price.toFixed(2) %> <%= product.isTaxable ? '(taxable)' : '' %></td>
+                                <td>
+                                    <span class="badge bg-<%= product.status === 'published' ? 'success' : 'secondary' %>">
+                                        <%= product.status %>
+                                    </span>
+                                </td>
+                                <td><%= new Date(product.createdAt).toLocaleDateString() %></td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="/admin/products/<%= product._id %>" class="btn btn-outline-primary">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="/admin/products/<%= product._id %>/edit" class="btn btn-outline-primary">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <form action="/admin/products/<%= product._id %>?_method=DELETE" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this product?');">
+                                            <button type="submit" class="btn btn-outline-danger">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">No products found.</td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+
+        <% if (totalPages > 1) { %>
+            <nav>
+                <ul class="pagination justify-content-center">
+                    <% if (currentPage > 1) { %>
+                        <li class="page-item">
+                            <a class="page-link" href="?page=<%= currentPage - 1 %><%= search ? '&search=' + search : '' %><%= statusFilter ? '&status=' + statusFilter : '' %>">Previous</a>
+                        </li>
+                    <% } %>
+                    <% for (let i = 1; i <= totalPages; i++) { %>
+                        <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                            <a class="page-link" href="?page=<%= i %><%= search ? '&search=' + search : '' %><%= statusFilter ? '&status=' + statusFilter : '' %>"><%= i %></a>
+                        </li>
+                    <% } %>
+                    <% if (currentPage < totalPages) { %>
+                        <li class="page-item">
+                            <a class="page-link" href="?page=<%= currentPage + 1 %><%= search ? '&search=' + search : '' %><%= statusFilter ? '&status=' + statusFilter : '' %>">Next</a>
+                        </li>
+                    <% } %>
+                </ul>
+            </nav>
+        <% } %>
+    </div>
+</div>
+

@@ -1,0 +1,46 @@
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-8">
+            <h1 class="mb-3"><%= product.name %></h1>
+            
+            <% if (product.mainImage) { %>
+                <img src="/admin/media/image/<%= product.mainImage._id %>/large" class="img-fluid rounded mb-4" alt="<%= product.name %>">
+            <% } %>
+
+            <div class="mb-4">
+                <p class="lead"><%= product.description %></p>
+            </div>
+
+            <div class="mb-4">
+                <h3 class="text-primary">$<%= product.price.toFixed(2) %></h3>
+                <% if (product.isTaxable) { %>
+                    <p class="text-muted">Taxable</p>
+                <% } %>
+            </div>
+
+            <% if (product.gallery && product.gallery.length > 0) { %>
+                <h3 class="mt-5 mb-3">Product Gallery</h3>
+                <div class="row g-3">
+                    <% product.gallery.forEach(image => { %>
+                        <div class="col-md-6">
+                            <img src="/admin/media/image/<%= image._id %>/medium" class="img-fluid rounded" alt="Product gallery image">
+                        </div>
+                    <% }); %>
+                </div>
+            <% } %>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5>Product Information</h5>
+                    <hr>
+                    <p><strong>Price:</strong> $<%= product.price.toFixed(2) %></p>
+                    <p><strong>Tax Status:</strong> <%= product.isTaxable ? 'Taxable' : 'Non-taxable' %></p>
+                    <a href="/products" class="btn btn-primary w-100">Back to Products</a>
+                    <a href="/contact" class="btn btn-outline-primary w-100 mt-2">Contact Us</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
