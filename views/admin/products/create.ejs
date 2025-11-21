@@ -1,0 +1,87 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-plus-circle"></i> Create New Product</h2>
+    <a href="/admin/products" class="btn btn-outline-secondary">Back to Products</a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form action="/admin/products" method="POST">
+            <div class="mb-3">
+                <label for="name" class="form-label">Product Name *</label>
+                <input type="text" class="form-control" id="name" name="name" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="description" class="form-label">Description *</label>
+                <textarea class="form-control" id="description" name="description" rows="6" required></textarea>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="price" class="form-label">Price *</label>
+                    <div class="input-group">
+                        <span class="input-group-text">$</span>
+                        <input type="number" class="form-control" id="price" name="price" step="0.01" min="0" required>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label for="isTaxable" class="form-label">Tax Status</label>
+                    <div class="form-check form-switch mt-2">
+                        <input class="form-check-input" type="checkbox" id="isTaxable" name="isTaxable" checked>
+                        <label class="form-check-label" for="isTaxable">Taxable</label>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label for="status" class="form-label">Status</label>
+                    <select class="form-select" id="status" name="status">
+                        <option value="draft">Draft</option>
+                        <option value="published">Published</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="mainImage" class="form-label">Main Image</label>
+                    <select class="form-select" id="mainImage" name="mainImage">
+                        <option value="">Select an image</option>
+                        <% media.forEach(item => { %>
+                            <option value="<%= item._id %>"><%= item.originalFilename %></option>
+                        <% }); %>
+                    </select>
+                    <div id="mainImagePreview" class="mt-2"></div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="gallery" class="form-label">Gallery Images</label>
+                    <select class="form-select" id="gallery" name="gallery" multiple size="5">
+                        <% media.forEach(item => { %>
+                            <option value="<%= item._id %>"><%= item.originalFilename %></option>
+                        <% }); %>
+                    </select>
+                    <small class="form-text text-muted">Hold Ctrl/Cmd to select multiple images</small>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Create Product</button>
+                <a href="/admin/products" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.getElementById('mainImage').addEventListener('change', function() {
+    const preview = document.getElementById('mainImagePreview');
+    const selectedId = this.value;
+    if (selectedId) {
+        preview.innerHTML = `<img src="/admin/media/image/${selectedId}/small" class="img-thumbnail" style="max-width: 200px;">`;
+    } else {
+        preview.innerHTML = '';
+    }
+});
+</script>
+

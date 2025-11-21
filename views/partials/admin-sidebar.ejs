@@ -1,0 +1,26 @@
+<aside class="admin-sidebar">
+    <div class="sidebar-header">
+        <h4><i class="bi bi-shield-lock"></i> Admin Panel</h4>
+    </div>
+    <nav class="sidebar-nav">
+        <a href="/admin" class="nav-item <%= typeof activePage !== 'undefined' && activePage === 'dashboard' ? 'active' : '' %>">
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+        <a href="/admin/media" class="nav-item <%= typeof activePage !== 'undefined' && activePage === 'media' ? 'active' : '' %>">
+            <i class="bi bi-images"></i> Media Library
+        </a>
+        <a href="/admin/projects" class="nav-item <%= typeof activePage !== 'undefined' && activePage === 'projects' ? 'active' : '' %>">
+            <i class="bi bi-folder"></i> Projects
+        </a>
+        <a href="/admin/products" class="nav-item <%= typeof activePage !== 'undefined' && activePage === 'products' ? 'active' : '' %>">
+            <i class="bi bi-box"></i> Products
+        </a>
+        <a href="/admin/services" class="nav-item <%= typeof activePage !== 'undefined' && activePage === 'services' ? 'active' : '' %>">
+            <i class="bi bi-tools"></i> Services
+        </a>
+        <a href="/admin/contacts" class="nav-item <%= typeof activePage !== 'undefined' && activePage === 'contacts' ? 'active' : '' %>">
+            <i class="bi bi-envelope"></i> Contacts
+        </a>
+    </nav>
+</aside>
+
