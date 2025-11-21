@@ -25,6 +25,40 @@
                 <h5 class="mb-0">Image Information</h5>
             </div>
             <div class="card-body">
+                <!-- Image URLs at the top -->
+                <div class="mb-4 pb-3 border-bottom">
+                    <label class="form-label fw-bold mb-3">Image URLs (Click to Copy):</label>
+                    <div class="mb-3">
+                        <label class="form-label small text-muted">Thumbnail (300px width):</label>
+                        <div class="input-group input-group-sm">
+                            <input type="text" class="form-control" id="url-thumbnail" value="<%= req.protocol %>://<%= req.get('host') %>/admin/media/image/<%= media._id %>/thumbnail" readonly>
+                            <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard('url-thumbnail')">
+                                <i class="bi bi-clipboard"></i> Copy
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label small text-muted">Medium (800px width):</label>
+                        <div class="input-group input-group-sm">
+                            <input type="text" class="form-control" id="url-medium" value="<%= req.protocol %>://<%= req.get('host') %>/admin/media/image/<%= media._id %>/medium" readonly>
+                            <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard('url-medium')">
+                                <i class="bi bi-clipboard"></i> Copy
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-0">
+                        <label class="form-label small text-muted">Large (1200px width):</label>
+                        <div class="input-group input-group-sm">
+                            <input type="text" class="form-control" id="url-large" value="<%= req.protocol %>://<%= req.get('host') %>/admin/media/image/<%= media._id %>/large" readonly>
+                            <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard('url-large')">
+                                <i class="bi bi-clipboard"></i> Copy
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="mb-3">
                     <label class="form-label fw-bold">Filename:</label>
                     <p class="mb-0"><%= media.originalFilename %></p>
@@ -59,44 +93,6 @@
                 <div class="mb-3">
                     <label class="form-label fw-bold">Uploaded:</label>
                     <p class="mb-0"><%= new Date(media.createdAt).toLocaleString() %></p>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Image Size Links -->
-        <div class="card mt-3">
-            <div class="card-header">
-                <h5 class="mb-0">Image URLs (Click to Copy)</h5>
-            </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Thumbnail (300px width):</label>
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="url-thumbnail" value="<%= req.protocol %>://<%= req.get('host') %>/admin/media/image/<%= media._id %>/thumbnail" readonly>
-                        <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard('url-thumbnail')">
-                            <i class="bi bi-clipboard"></i> Copy
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Medium (800px width):</label>
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="url-medium" value="<%= req.protocol %>://<%= req.get('host') %>/admin/media/image/<%= media._id %>/medium" readonly>
-                        <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard('url-medium')">
-                            <i class="bi bi-clipboard"></i> Copy
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Large (1200px width):</label>
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="url-large" value="<%= req.protocol %>://<%= req.get('host') %>/admin/media/image/<%= media._id %>/large" readonly>
-                        <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard('url-large')">
-                            <i class="bi bi-clipboard"></i> Copy
-                        </button>
-                    </div>
                 </div>
             </div>
         </div>
