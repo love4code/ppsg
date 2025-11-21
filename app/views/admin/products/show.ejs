@@ -17,10 +17,28 @@
                 <p><%= product.description %></p>
 
                 <div class="mb-3">
-                    <strong>Price:</strong> $<%= product.price.toFixed(2) %>
-                    <span class="badge bg-<%= product.isTaxable ? 'warning' : 'success' %> ms-2">
-                        <%= product.isTaxable ? 'Taxable' : 'Non-taxable' %>
-                    </span>
+                    <% if (product.price) { %>
+                        <strong>Price:</strong> $<%= product.price.toFixed(2) %>
+                        <span class="badge bg-<%= product.isTaxable ? 'warning' : 'success' %> ms-2">
+                            <%= product.isTaxable ? 'Taxable' : 'Non-taxable' %>
+                        </span>
+                    <% } else { %>
+                        <strong>Price:</strong> <span class="text-muted">Not set</span>
+                    <% } %>
+                    <% if (product.sizes && product.sizes.length > 0) { %>
+                        <div class="mt-2">
+                            <strong>Sizes:</strong>
+                            <ul class="mb-0">
+                                <% product.sizes.forEach(size => { %>
+                                    <li>
+                                        <%= size.name %>
+                                        <% if (size.price) { %> - $<%= size.price.toFixed(2) %><% } %>
+                                        <% if (size.description) { %> (<%= size.description %>)<% } %>
+                                    </li>
+                                <% }); %>
+                            </ul>
+                        </div>
+                    <% } %>
                 </div>
 
                 <div class="mb-3">

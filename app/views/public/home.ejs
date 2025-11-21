@@ -1,15 +1,32 @@
 <!-- Hero Section -->
-<section class="hero-section bg-primary text-white py-5 mb-5">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-lg-6">
-                <h1 class="display-4 fw-bold mb-4">Welcome to PPSG</h1>
-                <p class="lead mb-4">Your trusted partner for quality services and exceptional results.</p>
-                <a href="/contact" class="btn btn-light btn-lg">Get in Touch</a>
+<% if (typeof heroSettings !== 'undefined' && heroSettings && heroSettings.enabled !== false) { %>
+    <section class="hero-section mb-5" 
+             style="<%= heroSettings.backgroundImage && heroSettings.backgroundImage._id ? 'background-image: url(\'/admin/media/image/' + heroSettings.backgroundImage._id + '/large\'); background-size: cover; background-position: center;' : 'background-color: var(--bs-primary);' %> 
+                    color: <%= heroSettings.textColor || '#ffffff' %>;
+                    position: relative;
+                    <%= heroSettings.height === 'small' ? 'min-height: 300px;' : heroSettings.height === 'large' ? 'min-height: 500px;' : heroSettings.height === 'full' ? 'min-height: 100vh;' : 'min-height: 400px;' %>">
+        <% if (heroSettings.backgroundImage && heroSettings.backgroundImage._id) { %>
+            <div class="hero-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, <%= heroSettings.overlayOpacity || 0.5 %>); z-index: 1;"></div>
+        <% } %>
+        <div class="container" style="position: relative; z-index: 2;">
+            <div class="row align-items-center" style="<%= heroSettings.height === 'small' ? 'min-height: 300px;' : heroSettings.height === 'large' ? 'min-height: 500px;' : heroSettings.height === 'full' ? 'min-height: 100vh;' : 'min-height: 400px;' %>">
+                <div class="col-lg-8">
+                    <% if (heroSettings.title) { %>
+                        <h1 class="display-4 fw-bold mb-4" style="color: <%= heroSettings.textColor || '#ffffff' %>;"><%= heroSettings.title %></h1>
+                    <% } %>
+                    <% if (heroSettings.subtitle) { %>
+                        <p class="lead mb-4" style="color: <%= heroSettings.textColor || '#ffffff' %>;"><%= heroSettings.subtitle %></p>
+                    <% } %>
+                    <% if (heroSettings.buttonText) { %>
+                        <a href="<%= heroSettings.buttonLink || '/contact' %>" class="btn btn-light btn-lg" style="<%= heroSettings.backgroundImage && heroSettings.backgroundImage._id ? '' : 'background-color: rgba(255, 255, 255, 0.9); color: var(--bs-primary);' %>">
+                            <%= heroSettings.buttonText %>
+                        </a>
+                    <% } %>
+                </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
+<% } %>
 
 <!-- Featured Projects -->
 <% if (featuredProjects.length > 0) { %>
@@ -47,17 +64,19 @@
             <div class="row g-4">
                 <% featuredServices.forEach(service => { %>
                     <div class="col-md-4">
-                        <div class="card h-100 shadow-sm">
-                            <% if (service.mainImage && service.mainImage._id) { %>
-                                <img src="/admin/media/image/<%= service.mainImage._id %>/medium" class="card-img-top" alt="<%= service.name || 'Service' %>" style="height: 250px; object-fit: cover;">
-                            <% } %>
-                            <div class="card-body">
-                                <h5 class="card-title"><%= service.name %></h5>
-                                <p class="card-text text-muted"><%= service.description ? (service.description.length > 100 ? service.description.substring(0, 100) + '...' : service.description) : '' %></p>
-                                <% if (service.basePrice) { %>
-                                    <p class="text-primary fw-bold">Starting at $<%= service.basePrice.toFixed(2) %></p>
+                        <div class="card h-100 shadow-sm text-center">
+                            <div class="card-body d-flex flex-column">
+                                <% if (service.icon) { %>
+                                    <div class="mb-3">
+                                        <i class="bi <%= service.icon %>" style="font-size: 3rem; color: #0d6efd;"></i>
+                                    </div>
                                 <% } %>
-                                <a href="/services/<%= service.slug %>" class="btn btn-primary">Learn More</a>
+                                <h5 class="card-title mb-3"><%= service.name %></h5>
+                                <p class="card-text text-muted flex-grow-1"><%= service.description ? (service.description.length > 100 ? service.description.substring(0, 100) + '...' : service.description) : '' %></p>
+                                <% if (service.basePrice) { %>
+                                    <p class="text-primary fw-bold mb-3">Starting at $<%= service.basePrice.toFixed(2) %></p>
+                                <% } %>
+                                <a href="/services/<%= service.slug %>" class="btn btn-primary mt-auto">Learn More</a>
                             </div>
                         </div>
                     </div>
@@ -85,7 +104,6 @@
                             <div class="card-body">
                                 <h5 class="card-title"><%= product.name %></h5>
                                 <p class="card-text text-muted"><%= product.description ? (product.description.length > 100 ? product.description.substring(0, 100) + '...' : product.description) : '' %></p>
-                                <p class="text-primary fw-bold fs-4">$<%= product.price ? product.price.toFixed(2) : '0.00' %></p>
                                 <a href="/products/<%= product.slug %>" class="btn btn-primary">View Product</a>
                             </div>
                         </div>
@@ -98,4 +116,72 @@
         </div>
     </section>
 <% } %>
+
+<!-- Contact Form Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <h2 class="text-center mb-4">Get In Touch</h2>
+                <p class="text-center text-muted mb-5">Have a question or want to work with us? Send us a message and we'll get back to you as soon as possible.</p>
+                
+                <div class="card shadow-sm">
+                    <div class="card-body p-4">
+                        <% if (typeof success !== 'undefined' && success) { %>
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                <%= success %>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        <% } %>
+                        <% if (typeof error !== 'undefined' && error) { %>
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <%= error %>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        <% } %>
+                        
+                        <form action="/contact" method="POST">
+                            <input type="hidden" name="from" value="home">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="name" class="form-label">Name *</label>
+                                    <input type="text" class="form-control" id="name" name="name" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="email" class="form-label">Email *</label>
+                                    <input type="email" class="form-control" id="email" name="email" required>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="phone" class="form-label">Phone</label>
+                                    <input type="tel" class="form-control" id="phone" name="phone">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="reason" class="form-label">Reason for Contact</label>
+                                    <select class="form-select" id="reason" name="reason">
+                                        <option value="">Select a reason</option>
+                                        <option value="general">General Inquiry</option>
+                                        <option value="quote">Request a Quote</option>
+                                        <option value="service">Service Question</option>
+                                        <option value="product">Product Question</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="message" class="form-label">Message *</label>
+                                <textarea class="form-control" id="message" name="message" rows="5" required></textarea>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary btn-lg w-100">Send Message</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 

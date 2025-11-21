@@ -1,0 +1,160 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-pencil"></i> Edit Media</h2>
+    <a href="/admin/media/<%= media._id %>" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Back
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <img src="/admin/media/image/<%= media._id %>/large" class="img-fluid rounded" alt="<%= media.altText || media.title || media.originalFilename %>">
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <form action="/admin/media/<%= media._id %>?_method=PUT" method="POST">
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Title</label>
+                        <input type="text" class="form-control" id="title" name="title" value="<%= media.title || '' %>">
+                        <small class="form-text text-muted">A descriptive title for this image</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="altText" class="form-label">Alt Text *</label>
+                        <input type="text" class="form-control" id="altText" name="altText" value="<%= media.altText || '' %>" required>
+                        <small class="form-text text-muted">Important for accessibility and SEO. Describe what the image shows.</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="4"><%= media.description || '' %></textarea>
+                        <small class="form-text text-muted">A detailed description of the image</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Metadata</label>
+                        <div id="metadataFields">
+                            <% if (media.metadata && Object.keys(media.metadata).length > 0) { %>
+                                <% Object.entries(media.metadata).forEach(([key, value], index) => { %>
+                                    <div class="input-group mb-2">
+                                        <input type="text" class="form-control" name="metadata_<%= key %>" value="<%= key %>" placeholder="Key">
+                                        <input type="text" class="form-control" name="metadata_<%= key %>_value" value="<%= value %>" placeholder="Value">
+                                        <button type="button" class="btn btn-outline-danger" onclick="removeMetadataField(this)">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                <% }); %>
+                            <% } %>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="addMetadataField()">
+                            <i class="bi bi-plus"></i> Add Metadata Field
+                        </button>
+                        <small class="form-text text-muted d-block mt-1">Add custom metadata key-value pairs (e.g., photographer, location, etc.)</small>
+                    </div>
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Save Changes
+                        </button>
+                        <a href="/admin/media/<%= media._id %>" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Image Size Links -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0">Image URLs (Click to Copy)</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Small (300px width):</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="url-small" value="<%= req.protocol %>://<%= req.get('host') %>/admin/media/image/<%= media._id %>/small" readonly>
+                        <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard('url-small')">
+                            <i class="bi bi-clipboard"></i> Copy
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Medium (800px width):</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="url-medium" value="<%= req.protocol %>://<%= req.get('host') %>/admin/media/image/<%= media._id %>/medium" readonly>
+                        <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard('url-medium')">
+                            <i class="bi bi-clipboard"></i> Copy
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Large (1200px width):</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="url-large" value="<%= req.protocol %>://<%= req.get('host') %>/admin/media/image/<%= media._id %>/large" readonly>
+                        <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard('url-large')">
+                            <i class="bi bi-clipboard"></i> Copy
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let metadataCounter = <%= media.metadata ? Object.keys(media.metadata).length : 0 %>;
+
+function addMetadataField() {
+    const container = document.getElementById('metadataFields');
+    const field = document.createElement('div');
+    field.className = 'input-group mb-2';
+    field.innerHTML = `
+        <input type="text" class="form-control" name="metadata_key_${metadataCounter}" placeholder="Key">
+        <input type="text" class="form-control" name="metadata_value_${metadataCounter}" placeholder="Value">
+        <button type="button" class="btn btn-outline-danger" onclick="removeMetadataField(this)">
+            <i class="bi bi-trash"></i>
+        </button>
+    `;
+    container.appendChild(field);
+    metadataCounter++;
+}
+
+function removeMetadataField(button) {
+    button.closest('.input-group').remove();
+}
+
+function copyToClipboard(inputId) {
+    const input = document.getElementById(inputId);
+    input.select();
+    input.setSelectionRange(0, 99999);
+    
+    try {
+        document.execCommand('copy');
+        showCopyFeedback(input.nextElementSibling);
+    } catch (err) {
+        navigator.clipboard.writeText(input.value).then(() => {
+            showCopyFeedback(input.nextElementSibling);
+        });
+    }
+}
+
+function showCopyFeedback(button) {
+    const originalHTML = button.innerHTML;
+    button.innerHTML = '<i class="bi bi-check"></i> Copied!';
+    button.classList.add('btn-success');
+    button.classList.remove('btn-outline-secondary');
+    
+    setTimeout(() => {
+        button.innerHTML = originalHTML;
+        button.classList.remove('btn-success');
+        button.classList.add('btn-outline-secondary');
+    }, 2000);
+}
+</script>
+

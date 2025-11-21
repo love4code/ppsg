@@ -67,12 +67,18 @@ exports.index = async (req, res) => {
 
 exports.upload = async (req, res) => {
   try {
-    if (!req.files || req.files.length === 0) {
+    // Handle both single file and multiple files
+    const files = req.files && req.files.length > 0 ? req.files : (req.file ? [req.file] : []);
+    
+    if (files.length === 0) {
+      if (req.xhr || req.headers.accept && req.headers.accept.indexOf('json') > -1) {
+        return res.status(400).json({ error: 'No files uploaded' });
+      }
       req.session.error = 'No files uploaded';
       return res.redirect('/admin/media');
     }
 
-    const uploadPromises = req.files.map(async (file) => {
+    const uploadPromises = files.map(async (file) => {
       const processedSizes = await processImage(file.buffer);
       
       const media = new Media({
@@ -86,10 +92,26 @@ exports.upload = async (req, res) => {
     });
 
     await Promise.all(uploadPromises);
-    req.session.success = `${req.files.length} file(s) uploaded successfully`;
+    
+    // Return JSON for AJAX requests
+    if (req.xhr || req.headers.accept && req.headers.accept.indexOf('json') > -1) {
+      return res.json({ 
+        success: true, 
+        message: `${files.length} file(s) uploaded successfully`,
+        count: files.length 
+      });
+    }
+    
+    req.session.success = `${files.length} file(s) uploaded successfully`;
     res.redirect('/admin/media');
   } catch (error) {
     console.error('Upload error:', error);
+    
+    // Return JSON for AJAX requests
+    if (req.xhr || req.headers.accept && req.headers.accept.indexOf('json') > -1) {
+      return res.status(500).json({ error: 'Error uploading files' });
+    }
+    
     req.session.error = 'Error uploading files';
     res.redirect('/admin/media');
   }
@@ -119,6 +141,87 @@ exports.getImage = async (req, res) => {
     res.send(media.sizes[size].data);
   } catch (error) {
     res.status(500).send('Error loading image');
+  }
+};
+
+exports.show = async (req, res) => {
+  try {
+    const media = await Media.findById(req.params.id);
+    if (!media) {
+      req.session.error = 'Media not found';
+      return res.redirect('/admin/media');
+    }
+    res.render('admin/media/show', { media, req });
+  } catch (error) {
+    req.session.error = 'Error loading media';
+    res.redirect('/admin/media');
+  }
+};
+
+exports.edit = async (req, res) => {
+  try {
+    const media = await Media.findById(req.params.id);
+    if (!media) {
+      req.session.error = 'Media not found';
+      return res.redirect('/admin/media');
+    }
+    res.render('admin/media/edit', { media, req });
+  } catch (error) {
+    req.session.error = 'Error loading media';
+    res.redirect('/admin/media');
+  }
+};
+
+exports.update = async (req, res) => {
+  try {
+    const { title, altText, description } = req.body;
+    
+    // Handle metadata - parse key-value pairs from form
+    const metadata = {};
+    const metadataKeys = {};
+    
+    // First pass: collect all metadata keys and values
+    Object.keys(req.body).forEach(key => {
+      if (key.startsWith('metadata_key_')) {
+        const index = key.replace('metadata_key_', '');
+        metadataKeys[index] = req.body[key];
+      } else if (key.startsWith('metadata_value_')) {
+        const index = key.replace('metadata_value_', '');
+        if (metadataKeys[index] && req.body[key]) {
+          metadata[metadataKeys[index]] = req.body[key];
+        }
+      } else if (key.startsWith('metadata_') && !key.includes('_value')) {
+        // Handle existing metadata fields (from edit form)
+        const metaKey = key.replace('metadata_', '');
+        const valueKey = key + '_value';
+        if (req.body[valueKey]) {
+          metadata[metaKey] = req.body[valueKey];
+        }
+      }
+    });
+
+    const media = await Media.findByIdAndUpdate(
+      req.params.id,
+      {
+        title: title || '',
+        altText: altText || '',
+        description: description || '',
+        metadata: metadata,
+      },
+      { new: true, runValidators: true }
+    );
+
+    if (!media) {
+      req.session.error = 'Media not found';
+      return res.redirect('/admin/media');
+    }
+
+    req.session.success = 'Media updated successfully';
+    res.redirect(`/admin/media/${req.params.id}`);
+  } catch (error) {
+    console.error('Update media error:', error);
+    req.session.error = 'Error updating media';
+    res.redirect(`/admin/media/${req.params.id}/edit`);
   }
 };
 

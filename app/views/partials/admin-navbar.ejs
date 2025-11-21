@@ -1,11 +1,16 @@
 <nav class="admin-navbar">
     <div class="d-flex justify-content-between align-items-center w-100">
-        <h5 class="mb-0"><%= typeof pageTitle !== 'undefined' ? pageTitle : 'Admin' %></h5>
         <div class="d-flex align-items-center gap-3">
-            <span class="text-muted">Welcome, <%= currentUser ? currentUser.username : 'Admin' %></span>
+            <button class="btn btn-link text-dark d-md-none sidebar-toggle" type="button" id="sidebarToggle">
+                <i class="bi bi-list" style="font-size: 1.5rem;"></i>
+            </button>
+            <h5 class="mb-0"><%= typeof pageTitle !== 'undefined' ? pageTitle : 'Admin' %></h5>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+            <span class="text-muted d-none d-md-inline">Welcome, <%= currentUser ? currentUser.username : 'Admin' %></span>
             <form action="/admin/logout" method="POST" class="d-inline">
                 <button type="submit" class="btn btn-sm btn-outline-danger">
-                    <i class="bi bi-box-arrow-right"></i> Logout
+                    <i class="bi bi-box-arrow-right"></i> <span class="d-none d-sm-inline">Logout</span>
                 </button>
             </form>
         </div>

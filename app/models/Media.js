@@ -13,6 +13,15 @@ const mediaSchema = new mongoose.Schema({
     type: String,
     default: '',
   },
+  description: {
+    type: String,
+    default: '',
+  },
+  metadata: {
+    type: Map,
+    of: String,
+    default: {},
+  },
   mimeType: {
     type: String,
     required: true,

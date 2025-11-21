@@ -1,5 +1,4 @@
 const Service = require('../models/Service');
-const Media = require('../models/Media');
 
 exports.index = async (req, res) => {
   try {
@@ -21,7 +20,6 @@ exports.index = async (req, res) => {
     }
 
     const services = await Service.find(query)
-      .populate('mainImage')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
@@ -44,13 +42,12 @@ exports.index = async (req, res) => {
 
 exports.show = async (req, res) => {
   try {
-    const service = await Service.findById(req.params.id).populate('mainImage');
+    const service = await Service.findById(req.params.id);
     if (!service) {
       req.session.error = 'Service not found';
       return res.redirect('/admin/services');
     }
-    const media = await Media.find().sort({ createdAt: -1 }).limit(50);
-    res.render('admin/services/show', { service, media });
+    res.render('admin/services/show', { service });
   } catch (error) {
     req.session.error = 'Error loading service';
     res.redirect('/admin/services');
@@ -59,8 +56,7 @@ exports.show = async (req, res) => {
 
 exports.create = async (req, res) => {
   try {
-    const media = await Media.find().sort({ createdAt: -1 }).limit(50);
-    res.render('admin/services/create', { media });
+    res.render('admin/services/create');
   } catch (error) {
     req.session.error = 'Error loading form';
     res.redirect('/admin/services');
@@ -69,14 +65,26 @@ exports.create = async (req, res) => {
 
 exports.store = async (req, res) => {
   try {
-    const { name, description, basePrice, mainImage, status } = req.body;
+    const { name, description, basePrice, icon, status } = req.body;
+    
+    if (!icon || !icon.trim()) {
+      req.session.error = 'Icon is required';
+      return res.redirect('/admin/services/create');
+    }
+    
+    // Handle basePrice - set to null if empty/blank, otherwise parse as float
+    let parsedBasePrice = null;
+    if (basePrice && basePrice !== '' && basePrice !== null) {
+      const parsed = parseFloat(basePrice);
+      parsedBasePrice = isNaN(parsed) ? null : parsed;
+    }
     
     const service = new Service({
       name,
       slug: name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
       description,
-      basePrice: basePrice ? parseFloat(basePrice) : undefined,
-      mainImage: mainImage || undefined,
+      basePrice: parsedBasePrice,
+      icon: icon.trim(),
       status: status || 'draft',
     });
 
@@ -92,13 +100,12 @@ exports.store = async (req, res) => {
 
 exports.edit = async (req, res) => {
   try {
-    const service = await Service.findById(req.params.id).populate('mainImage');
+    const service = await Service.findById(req.params.id);
     if (!service) {
       req.session.error = 'Service not found';
       return res.redirect('/admin/services');
     }
-    const media = await Media.find().sort({ createdAt: -1 }).limit(50);
-    res.render('admin/services/edit', { service, media });
+    res.render('admin/services/edit', { service });
   } catch (error) {
     req.session.error = 'Error loading service';
     res.redirect('/admin/services');
@@ -107,17 +114,32 @@ exports.edit = async (req, res) => {
 
 exports.update = async (req, res) => {
   try {
-    const { name, description, basePrice, mainImage, status } = req.body;
+    const { name, description, basePrice, icon, status } = req.body;
+    
+    if (!icon || !icon.trim()) {
+      req.session.error = 'Icon is required';
+      return res.redirect(`/admin/services/${req.params.id}/edit`);
+    }
+    
+    // Handle basePrice - set to null if empty/blank, otherwise parse as float
+    const updateData = {
+      name,
+      description,
+      icon: icon.trim(),
+      status: status || 'draft',
+    };
+    
+    // Explicitly handle basePrice - if empty string or undefined, set to null to clear it
+    if (basePrice === '' || basePrice === null || basePrice === undefined) {
+      updateData.basePrice = null;
+    } else {
+      const parsedPrice = parseFloat(basePrice);
+      updateData.basePrice = isNaN(parsedPrice) ? null : parsedPrice;
+    }
     
     const service = await Service.findByIdAndUpdate(
       req.params.id,
-      {
-        name,
-        description,
-        basePrice: basePrice ? parseFloat(basePrice) : undefined,
-        mainImage: mainImage || undefined,
-        status: status || 'draft',
-      },
+      updateData,
       { new: true, runValidators: true }
     );
 
@@ -150,7 +172,6 @@ exports.delete = async (req, res) => {
 exports.publicIndex = async (req, res) => {
   try {
     const services = await Service.find({ status: 'published' })
-      .populate('mainImage')
       .sort({ createdAt: -1 });
 
     res.render('public/services/index', { services });
@@ -162,8 +183,7 @@ exports.publicIndex = async (req, res) => {
 
 exports.publicShow = async (req, res) => {
   try {
-    const service = await Service.findOne({ slug: req.params.slug, status: 'published' })
-      .populate('mainImage');
+    const service = await Service.findOne({ slug: req.params.slug, status: 'published' });
     
     if (!service) {
       return res.status(404).render('errors/404');

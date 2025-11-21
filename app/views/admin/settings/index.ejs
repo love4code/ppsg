@@ -1,0 +1,455 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-gear"></i> Site Settings</h2>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-palette"></i> Theme Settings</h5>
+            </div>
+            <div class="card-body">
+                <form action="/admin/settings" method="POST" id="settingsForm">
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Select Theme</label>
+                        <div class="row g-3" id="themeSelector">
+                            <div class="col-md-4">
+                                <div class="theme-option card h-100 <%= settings.theme === 'default' ? 'border-primary border-3' : '' %>" data-theme="default">
+                                    <div class="card-body text-center">
+                                        <div class="theme-preview mb-2" style="background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%); height: 60px; border-radius: 8px;"></div>
+                                        <h6 class="mb-0">Default Blue</h6>
+                                        <small class="text-muted">Bootstrap default</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="theme-option card h-100 <%= settings.theme === 'ocean' ? 'border-primary border-3' : '' %>" data-theme="ocean">
+                                    <div class="card-body text-center">
+                                        <div class="theme-preview mb-2" style="background: linear-gradient(135deg, #0066cc 0%, #004499 100%); height: 60px; border-radius: 8px;"></div>
+                                        <h6 class="mb-0">Ocean Blue</h6>
+                                        <small class="text-muted">Deep ocean tones</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="theme-option card h-100 <%= settings.theme === 'sky' ? 'border-primary border-3' : '' %>" data-theme="sky">
+                                    <div class="card-body text-center">
+                                        <div class="theme-preview mb-2" style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); height: 60px; border-radius: 8px;"></div>
+                                        <h6 class="mb-0">Sky Blue</h6>
+                                        <small class="text-muted">Bright and clear</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="theme-option card h-100 <%= settings.theme === 'navy' ? 'border-primary border-3' : '' %>" data-theme="navy">
+                                    <div class="card-body text-center">
+                                        <div class="theme-preview mb-2" style="background: linear-gradient(135deg, #001f3f 0%, #000814 100%); height: 60px; border-radius: 8px;"></div>
+                                        <h6 class="mb-0">Navy Blue</h6>
+                                        <small class="text-muted">Dark and professional</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="theme-option card h-100 <%= settings.theme === 'royal' ? 'border-primary border-3' : '' %>" data-theme="royal">
+                                    <div class="card-body text-center">
+                                        <div class="theme-preview mb-2" style="background: linear-gradient(135deg, #4169e1 0%, #2c4fc7 100%); height: 60px; border-radius: 8px;"></div>
+                                        <h6 class="mb-0">Royal Blue</h6>
+                                        <small class="text-muted">Rich and elegant</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="theme-option card h-100 <%= settings.theme === 'teal' ? 'border-primary border-3' : '' %>" data-theme="teal">
+                                    <div class="card-body text-center">
+                                        <div class="theme-preview mb-2" style="background: linear-gradient(135deg, #008080 0%, #005555 100%); height: 60px; border-radius: 8px;"></div>
+                                        <h6 class="mb-0">Teal Blue</h6>
+                                        <small class="text-muted">Fresh and modern</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="theme-option card h-100 <%= settings.theme === 'custom' ? 'border-primary border-3' : '' %>" data-theme="custom">
+                                    <div class="card-body text-center">
+                                        <div class="theme-preview mb-2" style="background: linear-gradient(135deg, #6c757d 0%, #495057 100%); height: 60px; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                            <i class="bi bi-palette-fill text-white" style="font-size: 2rem;"></i>
+                                        </div>
+                                        <h6 class="mb-0">Custom</h6>
+                                        <small class="text-muted">Create your own</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <input type="hidden" name="theme" id="selectedTheme" value="<%= settings.theme %>">
+                    </div>
+
+                    <div id="customColorsSection" style="display: <%= settings.theme === 'custom' ? 'block' : 'none' %>;">
+                        <hr>
+                        <h5 class="mb-3">Custom Color Palette</h5>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="customPrimary" class="form-label">Primary Color</label>
+                                <div class="input-group">
+                                    <input type="color" class="form-control form-control-color" id="customPrimary" name="customColors[primary]" value="<%= settings.customColors.primary %>">
+                                    <input type="text" class="form-control" value="<%= settings.customColors.primary %>" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="customSecondary" class="form-label">Secondary Color</label>
+                                <div class="input-group">
+                                    <input type="color" class="form-control form-control-color" id="customSecondary" name="customColors[secondary]" value="<%= settings.customColors.secondary %>">
+                                    <input type="text" class="form-control" value="<%= settings.customColors.secondary %>" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="customSuccess" class="form-label">Success Color</label>
+                                <div class="input-group">
+                                    <input type="color" class="form-control form-control-color" id="customSuccess" name="customColors[success]" value="<%= settings.customColors.success %>">
+                                    <input type="text" class="form-control" value="<%= settings.customColors.success %>" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="customDanger" class="form-label">Danger Color</label>
+                                <div class="input-group">
+                                    <input type="color" class="form-control form-control-color" id="customDanger" name="customColors[danger]" value="<%= settings.customColors.danger %>">
+                                    <input type="text" class="form-control" value="<%= settings.customColors.danger %>" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="customWarning" class="form-label">Warning Color</label>
+                                <div class="input-group">
+                                    <input type="color" class="form-control form-control-color" id="customWarning" name="customColors[warning]" value="<%= settings.customColors.warning %>">
+                                    <input type="text" class="form-control" value="<%= settings.customColors.warning %>" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="customInfo" class="form-label">Info Color</label>
+                                <div class="input-group">
+                                    <input type="color" class="form-control form-control-color" id="customInfo" name="customColors[info]" value="<%= settings.customColors.info %>">
+                                    <input type="text" class="form-control" value="<%= settings.customColors.info %>" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <div class="card bg-light p-3">
+                                <h6 class="mb-2">Color Preview</h6>
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <span class="badge" id="previewPrimary" style="background-color: <%= settings.customColors.primary %>;">Primary</span>
+                                    <span class="badge" id="previewSecondary" style="background-color: <%= settings.customColors.secondary %>;">Secondary</span>
+                                    <span class="badge" id="previewSuccess" style="background-color: <%= settings.customColors.success %>;">Success</span>
+                                    <span class="badge" id="previewDanger" style="background-color: <%= settings.customColors.danger %>;">Danger</span>
+                                    <span class="badge" id="previewWarning" style="background-color: <%= settings.customColors.warning %>;">Warning</span>
+                                    <span class="badge" id="previewInfo" style="background-color: <%= settings.customColors.info %>;">Info</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+                    
+                    <h5 class="mb-3"><i class="bi bi-image"></i> Hero Section Settings</h5>
+                    
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="heroEnabled" name="hero[enabled]" <%= settings.hero && settings.hero.enabled ? 'checked' : '' %>>
+                            <label class="form-check-label" for="heroEnabled">
+                                Enable Hero Section
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div id="heroSettings" style="display: <%= settings.hero && settings.hero.enabled ? 'block' : 'none' %>;">
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label for="heroTitle" class="form-label">Hero Title</label>
+                                <input type="text" class="form-control" id="heroTitle" name="hero[title]" value="<%= settings.hero && settings.hero.title ? settings.hero.title : 'Welcome to PPSG' %>">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="heroSubtitle" class="form-label">Hero Subtitle</label>
+                                <input type="text" class="form-control" id="heroSubtitle" name="hero[subtitle]" value="<%= settings.hero && settings.hero.subtitle ? settings.hero.subtitle : '' %>">
+                            </div>
+                        </div>
+                        
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label for="heroButtonText" class="form-label">Button Text</label>
+                                <input type="text" class="form-control" id="heroButtonText" name="hero[buttonText]" value="<%= settings.hero && settings.hero.buttonText ? settings.hero.buttonText : 'Get in Touch' %>">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="heroButtonLink" class="form-label">Button Link</label>
+                                <input type="text" class="form-control" id="heroButtonLink" name="hero[buttonLink]" value="<%= settings.hero && settings.hero.buttonLink ? settings.hero.buttonLink : '/contact' %>">
+                            </div>
+                        </div>
+                        
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label for="heroTextColor" class="form-label">Text Color</label>
+                                <div class="input-group">
+                                    <input type="color" class="form-control form-control-color" id="heroTextColor" name="hero[textColor]" value="<%= settings.hero && settings.hero.textColor ? settings.hero.textColor : '#ffffff' %>">
+                                    <input type="text" class="form-control" value="<%= settings.hero && settings.hero.textColor ? settings.hero.textColor : '#ffffff' %>" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="heroHeight" class="form-label">Hero Height</label>
+                                <select class="form-select" id="heroHeight" name="hero[height]">
+                                    <option value="small" <%= settings.hero && settings.hero.height === 'small' ? 'selected' : '' %>>Small</option>
+                                    <option value="medium" <%= settings.hero && settings.hero.height === 'medium' ? 'selected' : '' %>>Medium</option>
+                                    <option value="large" <%= settings.hero && settings.hero.height === 'large' ? 'selected' : '' %>>Large</option>
+                                    <option value="full" <%= settings.hero && settings.hero.height === 'full' ? 'selected' : '' %>>Full Screen</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="heroBackgroundImage" class="form-label">Background Image</label>
+                            <input type="hidden" id="heroBackgroundImage" name="hero[backgroundImage]" value="<%= settings.hero && settings.hero.backgroundImage ? (settings.hero.backgroundImage._id || settings.hero.backgroundImage) : '' %>">
+                            <div class="d-flex gap-2 mb-2">
+                                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#heroImageModal">
+                                    <i class="bi bi-images"></i> Choose from Media Library
+                                </button>
+                                <button type="button" class="btn btn-outline-danger" id="clearHeroImage" style="display: <%= settings.hero && settings.hero.backgroundImage ? 'block' : 'none' %>;" onclick="clearHeroImage()">
+                                    <i class="bi bi-x"></i> Clear
+                                </button>
+                            </div>
+                            <div id="heroImagePreview" class="mt-2">
+                                <% if (settings.hero && settings.hero.backgroundImage && settings.hero.backgroundImage._id) { %>
+                                    <img src="/admin/media/image/<%= settings.hero.backgroundImage._id %>/medium" class="img-thumbnail" style="max-width: 300px; max-height: 200px; object-fit: cover;">
+                                <% } %>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="heroOverlayOpacity" class="form-label">Overlay Opacity: <span id="overlayOpacityValue"><%= settings.hero && settings.hero.overlayOpacity ? (settings.hero.overlayOpacity * 100).toFixed(0) : '50' %>%</span></label>
+                            <input type="range" class="form-range" id="heroOverlayOpacity" name="hero[overlayOpacity]" min="0" max="1" step="0.1" value="<%= settings.hero && settings.hero.overlayOpacity ? settings.hero.overlayOpacity : 0.5 %>">
+                            <small class="form-text text-muted">Adjust the dark overlay on background images for better text readability</small>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Save Settings
+                        </button>
+                        <a href="/admin" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="bi bi-info-circle"></i> About Themes</h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-3">Choose from pre-designed blue-based themes or create your own custom color scheme.</p>
+                <h6>Pre-designed Themes:</h6>
+                <ul class="small">
+                    <li><strong>Default Blue:</strong> Bootstrap's standard blue</li>
+                    <li><strong>Ocean Blue:</strong> Deep ocean-inspired colors</li>
+                    <li><strong>Sky Blue:</strong> Bright and clear sky tones</li>
+                    <li><strong>Navy Blue:</strong> Professional dark navy</li>
+                    <li><strong>Royal Blue:</strong> Rich and elegant royal blue</li>
+                    <li><strong>Teal Blue:</strong> Fresh teal-blue combination</li>
+                </ul>
+                <hr>
+                <h6>Custom Theme:</h6>
+                <p class="small mb-0">Select "Custom" to use color pickers and create your own unique theme. Changes apply immediately to both admin and public pages.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hero Image Picker Modal -->
+<div class="modal fade" id="heroImageModal" tabindex="-1" aria-labelledby="heroImageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="heroImageModalLabel">Select Background Image</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <input type="text" class="form-control" id="heroMediaSearch" placeholder="Search images...">
+                </div>
+                <div id="heroMediaGrid" class="row g-3" style="max-height: 500px; overflow-y: auto;">
+                    <% if (typeof media !== 'undefined' && media.length > 0) { %>
+                        <% media.forEach(item => { %>
+                            <div class="col-md-3">
+                                <div class="card media-item" data-id="<%= item._id %>" onclick="selectHeroImage('<%= item._id %>')">
+                                    <img src="/admin/media/image/<%= item._id %>/small" class="card-img-top" alt="<%= item.originalFilename %>" style="height: 150px; object-fit: cover;">
+                                    <div class="card-body p-2">
+                                        <small class="text-muted d-block text-truncate"><%= item.title || item.originalFilename %></small>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }); %>
+                    <% } else { %>
+                        <div class="col-12">
+                            <p class="text-center text-muted">No images available. Upload images in the Media Library first.</p>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const allMedia = <%= typeof media !== 'undefined' ? JSON.stringify(media) : '[]' %>;
+// Theme selection
+document.querySelectorAll('.theme-option').forEach(option => {
+    option.addEventListener('click', function() {
+        // Remove active class from all
+        document.querySelectorAll('.theme-option').forEach(opt => {
+            opt.classList.remove('border-primary', 'border-3');
+        });
+        // Add active class to selected
+        this.classList.add('border-primary', 'border-3');
+        
+        const theme = this.getAttribute('data-theme');
+        document.getElementById('selectedTheme').value = theme;
+        
+        // Show/hide custom colors section
+        const customSection = document.getElementById('customColorsSection');
+        if (theme === 'custom') {
+            customSection.style.display = 'block';
+        } else {
+            customSection.style.display = 'none';
+        }
+    });
+});
+
+// Color picker updates
+const colorInputs = ['customPrimary', 'customSecondary', 'customSuccess', 'customDanger', 'customWarning', 'customInfo'];
+colorInputs.forEach(inputId => {
+    const input = document.getElementById(inputId);
+    if (input) {
+        input.addEventListener('input', function() {
+            // Update text input
+            const textInput = this.parentElement.querySelector('input[type="text"]');
+            textInput.value = this.value;
+            
+            // Update preview badge
+            const previewId = 'preview' + inputId.replace('custom', '');
+            const preview = document.getElementById(previewId);
+            if (preview) {
+                preview.style.backgroundColor = this.value;
+            }
+        });
+    }
+});
+
+// Hero section toggle
+document.getElementById('heroEnabled').addEventListener('change', function() {
+    const heroSettings = document.getElementById('heroSettings');
+    heroSettings.style.display = this.checked ? 'block' : 'none';
+});
+
+// Overlay opacity slider
+const overlaySlider = document.getElementById('heroOverlayOpacity');
+if (overlaySlider) {
+    overlaySlider.addEventListener('input', function() {
+        document.getElementById('overlayOpacityValue').textContent = Math.round(this.value * 100) + '%';
+    });
+}
+
+// Hero image picker
+function selectHeroImage(imageId) {
+    document.getElementById('heroBackgroundImage').value = imageId;
+    const preview = document.getElementById('heroImagePreview');
+    preview.innerHTML = `<img src="/admin/media/image/${imageId}/medium" class="img-thumbnail" style="max-width: 300px; max-height: 200px; object-fit: cover;">`;
+    document.getElementById('clearHeroImage').style.display = 'block';
+    
+    // Close modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('heroImageModal'));
+    if (modal) {
+        modal.hide();
+    }
+}
+
+function clearHeroImage() {
+    document.getElementById('heroBackgroundImage').value = '';
+    document.getElementById('heroImagePreview').innerHTML = '';
+    document.getElementById('clearHeroImage').style.display = 'none';
+}
+
+// Hero media search
+if (document.getElementById('heroMediaSearch')) {
+    document.getElementById('heroMediaSearch').addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const filtered = allMedia.filter(item => 
+            item.originalFilename.toLowerCase().includes(searchTerm) ||
+            (item.title && item.title.toLowerCase().includes(searchTerm)) ||
+            (item.altText && item.altText.toLowerCase().includes(searchTerm))
+        );
+        renderHeroMediaGrid(filtered);
+    });
+}
+
+function renderHeroMediaGrid(mediaItems) {
+    const grid = document.getElementById('heroMediaGrid');
+    if (!grid) return;
+    
+    if (mediaItems.length === 0) {
+        grid.innerHTML = '<div class="col-12"><p class="text-center text-muted">No images found.</p></div>';
+        return;
+    }
+    
+    grid.innerHTML = mediaItems.map(item => `
+        <div class="col-md-3">
+            <div class="card media-item" data-id="${item._id}" onclick="selectHeroImage('${item._id}')" style="cursor: pointer;">
+                <img src="/admin/media/image/${item._id}/small" class="card-img-top" alt="${item.originalFilename}" style="height: 150px; object-fit: cover;">
+                <div class="card-body p-2">
+                    <small class="text-muted d-block text-truncate">${item.title || item.originalFilename}</small>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Text color picker update
+const heroTextColorInput = document.getElementById('heroTextColor');
+if (heroTextColorInput) {
+    heroTextColorInput.addEventListener('input', function() {
+        const textInput = this.parentElement.querySelector('input[type="text"]');
+        if (textInput) {
+            textInput.value = this.value;
+        }
+    });
+}
+
+// Form submission
+document.getElementById('settingsForm').addEventListener('submit', function(e) {
+    // Reload theme CSS after save
+    setTimeout(() => {
+        const themeLink = document.querySelector('link[href="/admin/api/theme.css"]');
+        if (themeLink) {
+            themeLink.href = '/admin/api/theme.css?v=' + new Date().getTime();
+        }
+    }, 500);
+});
+</script>
+
+<style>
+.theme-option {
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.theme-option:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.theme-preview {
+    transition: transform 0.2s;
+}
+
+.theme-option:hover .theme-preview {
+    transform: scale(1.05);
+}
+</style>
+

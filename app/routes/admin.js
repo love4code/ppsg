@@ -15,6 +15,7 @@ const projectController = require('../controllers/projectController');
 const productController = require('../controllers/productController');
 const serviceController = require('../controllers/serviceController');
 const contactController = require('../controllers/contactController');
+const settingsController = require('../controllers/settingsController');
 
 // Auth routes (no auth required)
 router.get('/login', authController.showLogin);
@@ -29,7 +30,11 @@ router.get('/', adminController.dashboard);
 
 // Media routes
 router.get('/media', mediaController.index);
+router.get('/media/:id', mediaController.show);
+router.get('/media/:id/edit', mediaController.edit);
+router.put('/media/:id', mediaController.update);
 router.post('/media/upload', upload.array('files', 10), mediaController.upload);
+router.post('/media/upload-single', upload.single('files'), mediaController.upload);
 router.delete('/media/:id', mediaController.delete);
 router.get('/media/image/:id/:size', mediaController.getImage);
 router.get('/api/media', mediaController.getAll);
@@ -66,6 +71,12 @@ router.get('/contacts', contactController.index);
 router.get('/contacts/:id', contactController.show);
 router.put('/contacts/:id/status', contactController.updateStatus);
 router.delete('/contacts/:id', contactController.delete);
+
+// Settings routes
+router.get('/settings', settingsController.index);
+router.post('/settings', settingsController.update);
+router.put('/settings', settingsController.update);
+router.get('/api/theme.css', settingsController.getThemeCSS);
 
 module.exports = router;
 

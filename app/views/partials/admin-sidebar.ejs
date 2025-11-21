@@ -1,8 +1,16 @@
-<aside class="admin-sidebar">
+<aside class="admin-sidebar" id="adminSidebar">
     <div class="sidebar-header">
-        <h4><i class="bi bi-shield-lock"></i> Admin Panel</h4>
+        <div class="d-flex justify-content-between align-items-center">
+            <h4 class="mb-0"><i class="bi bi-shield-lock"></i> Admin Panel</h4>
+            <button class="btn btn-link text-white d-md-none sidebar-close" type="button" id="sidebarClose">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
     </div>
     <nav class="sidebar-nav">
+        <a href="/" class="nav-item" target="_blank">
+            <i class="bi bi-house-door"></i> Home Page
+        </a>
         <a href="/admin" class="nav-item <%= typeof activePage !== 'undefined' && activePage === 'dashboard' ? 'active' : '' %>">
             <i class="bi bi-speedometer2"></i> Dashboard
         </a>
@@ -21,6 +29,10 @@
         <a href="/admin/contacts" class="nav-item <%= typeof activePage !== 'undefined' && activePage === 'contacts' ? 'active' : '' %>">
             <i class="bi bi-envelope"></i> Contacts
         </a>
+        <a href="/admin/settings" class="nav-item <%= typeof activePage !== 'undefined' && activePage === 'settings' ? 'active' : '' %>">
+            <i class="bi bi-gear"></i> Settings
+        </a>
     </nav>
 </aside>
+<div class="sidebar-overlay d-md-none" id="sidebarOverlay"></div>
 

@@ -3,11 +3,15 @@ const { sendContactEmail } = require('../config/email');
 
 exports.submit = async (req, res) => {
   try {
-    const { name, email, phone, message, reason } = req.body;
+    const { name, email, phone, message, reason, from, productId, productName, selectedSizes } = req.body;
 
     if (!name || !email || !message) {
       req.session.error = 'Name, email, and message are required';
-      return res.redirect('/contact');
+      // Redirect back to where form came from
+      if (from === 'product' && productId) {
+        return res.redirect(`/products/${productId}`);
+      }
+      return res.redirect(from === 'home' ? '/' : '/contact');
     }
 
     const contact = new Contact({
@@ -16,9 +20,23 @@ exports.submit = async (req, res) => {
       phone: phone || '',
       message,
       reason: reason || '',
+      productId: productId || undefined,
+      productName: productName || '',
+      selectedSizes: selectedSizes || '',
     });
 
     await contact.save();
+
+    // Parse selected sizes for email
+    let parsedSizes = [];
+    if (selectedSizes) {
+      try {
+        parsedSizes = JSON.parse(selectedSizes);
+      } catch (e) {
+        // If parsing fails, treat as string
+        parsedSizes = selectedSizes;
+      }
+    }
 
     // Send email
     const emailSent = await sendContactEmail({
@@ -27,6 +45,8 @@ exports.submit = async (req, res) => {
       phone,
       message,
       reason,
+      productName,
+      selectedSizes: parsedSizes,
     });
 
     if (emailSent) {
@@ -35,11 +55,19 @@ exports.submit = async (req, res) => {
       req.session.success = 'Your message has been received. We will get back to you soon.';
     }
 
-    res.redirect('/contact');
+    // Redirect back to where form came from
+    if (from === 'product' && productId) {
+      return res.redirect(`/products/${productId}`);
+    }
+    res.redirect(from === 'home' ? '/' : '/contact');
   } catch (error) {
     console.error('Contact form error:', error);
     req.session.error = 'Error submitting form. Please try again.';
-    res.redirect('/contact');
+    const { from, productId } = req.body;
+    if (from === 'product' && productId) {
+      return res.redirect(`/products/${productId}`);
+    }
+    res.redirect(from === 'home' ? '/' : '/contact');
   }
 };
 

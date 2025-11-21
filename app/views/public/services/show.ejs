@@ -1,11 +1,12 @@
 <div class="container py-5">
     <div class="row">
         <div class="col-md-8">
-            <h1 class="mb-3"><%= service.name %></h1>
-            
-            <% if (service.mainImage) { %>
-                <img src="/admin/media/image/<%= service.mainImage._id %>/large" class="img-fluid rounded mb-4" alt="<%= service.name %>">
-            <% } %>
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <% if (service.icon) { %>
+                    <i class="bi <%= service.icon %>" style="font-size: 4rem; color: #0d6efd;"></i>
+                <% } %>
+                <h1 class="mb-0"><%= service.name %></h1>
+            </div>
 
             <div class="mb-4">
                 <p class="lead"><%= service.description %></p>

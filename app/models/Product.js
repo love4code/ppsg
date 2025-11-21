@@ -18,9 +18,23 @@ const productSchema = new mongoose.Schema({
   },
   price: {
     type: Number,
-    required: true,
     min: 0,
   },
+  sizes: [{
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    price: {
+      type: Number,
+      min: 0,
+    },
+    description: {
+      type: String,
+      default: '',
+    },
+  }],
   isTaxable: {
     type: Boolean,
     default: true,

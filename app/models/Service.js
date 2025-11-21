@@ -20,9 +20,10 @@ const serviceSchema = new mongoose.Schema({
     type: Number,
     min: 0,
   },
-  mainImage: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Media',
+  icon: {
+    type: String,
+    default: '',
+    trim: true,
   },
   status: {
     type: String,

@@ -5,17 +5,19 @@
         <div class="row g-4">
             <% services.forEach(service => { %>
                 <div class="col-md-4">
-                    <div class="card h-100 shadow-sm">
-                        <% if (service.mainImage) { %>
-                            <img src="/admin/media/image/<%= service.mainImage._id %>/medium" class="card-img-top" alt="<%= service.name %>" style="height: 250px; object-fit: cover;">
-                        <% } %>
-                        <div class="card-body">
-                            <h5 class="card-title"><%= service.name %></h5>
-                            <p class="card-text text-muted"><%= service.description.substring(0, 100) %>...</p>
-                            <% if (service.basePrice) { %>
-                                <p class="text-primary fw-bold">Starting at $<%= service.basePrice.toFixed(2) %></p>
+                    <div class="card h-100 shadow-sm text-center">
+                        <div class="card-body d-flex flex-column">
+                            <% if (service.icon) { %>
+                                <div class="mb-3">
+                                    <i class="bi <%= service.icon %>" style="font-size: 3rem; color: #0d6efd;"></i>
+                                </div>
                             <% } %>
-                            <a href="/services/<%= service.slug %>" class="btn btn-primary">Learn More</a>
+                            <h5 class="card-title mb-3"><%= service.name %></h5>
+                            <p class="card-text text-muted flex-grow-1"><%= service.description ? (service.description.length > 100 ? service.description.substring(0, 100) + '...' : service.description) : '' %></p>
+                            <% if (service.basePrice) { %>
+                                <p class="text-primary fw-bold mb-3">Starting at $<%= service.basePrice.toFixed(2) %></p>
+                            <% } %>
+                            <a href="/services/<%= service.slug %>" class="btn btn-primary mt-auto">Learn More</a>
                         </div>
                     </div>
                 </div>

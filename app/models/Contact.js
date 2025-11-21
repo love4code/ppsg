@@ -24,6 +24,18 @@ const contactSchema = new mongoose.Schema({
     type: String,
     default: '',
   },
+  productId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Product',
+  },
+  productName: {
+    type: String,
+    default: '',
+  },
+  selectedSizes: {
+    type: String,
+    default: '',
+  },
   status: {
     type: String,
     enum: ['new', 'read'],

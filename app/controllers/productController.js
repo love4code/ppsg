@@ -69,18 +69,47 @@ exports.create = async (req, res) => {
 
 exports.store = async (req, res) => {
   try {
-    const { name, description, price, isTaxable, mainImage, gallery, status } = req.body;
+    const { name, description, price, isTaxable, mainImage, gallery, status, sizes } = req.body;
     
-    const galleryArray = Array.isArray(gallery) ? gallery : gallery ? [gallery] : [];
+    // Handle gallery - can be array, comma-separated string, or single value
+    let galleryArray = [];
+    if (gallery) {
+      if (Array.isArray(gallery)) {
+        galleryArray = gallery.filter(id => id && id.trim());
+      } else if (typeof gallery === 'string' && gallery.includes(',')) {
+        galleryArray = gallery.split(',').map(id => id.trim()).filter(id => id);
+      } else if (gallery.trim()) {
+        galleryArray = [gallery.trim()];
+      }
+    }
+    
+    // Handle sizes - parse from form data
+    let sizesArray = [];
+    if (sizes && typeof sizes === 'object') {
+      sizesArray = Object.keys(sizes)
+        .map(key => {
+          const size = sizes[key];
+          if (size && size.name && size.name.trim()) {
+            return {
+              name: size.name.trim(),
+              price: size.price && size.price.trim() ? parseFloat(size.price) : undefined,
+              description: size.description ? size.description.trim() : '',
+            };
+          }
+          return null;
+        })
+        .filter(size => size !== null);
+    }
     
     const product = new Product({
       name,
       slug: name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
       description,
-      price: parseFloat(price),
+      price: price && price.trim() ? parseFloat(price) : undefined,
       isTaxable: isTaxable === 'on' || isTaxable === true,
       mainImage: mainImage || undefined,
       gallery: galleryArray,
+      sizes: sizesArray,
       status: status || 'draft',
     });
 
@@ -111,19 +140,48 @@ exports.edit = async (req, res) => {
 
 exports.update = async (req, res) => {
   try {
-    const { name, description, price, isTaxable, mainImage, gallery, status } = req.body;
+    const { name, description, price, isTaxable, mainImage, gallery, status, sizes } = req.body;
     
-    const galleryArray = Array.isArray(gallery) ? gallery : gallery ? [gallery] : [];
+    // Handle gallery - can be array, comma-separated string, or single value
+    let galleryArray = [];
+    if (gallery) {
+      if (Array.isArray(gallery)) {
+        galleryArray = gallery.filter(id => id && id.trim());
+      } else if (typeof gallery === 'string' && gallery.includes(',')) {
+        galleryArray = gallery.split(',').map(id => id.trim()).filter(id => id);
+      } else if (gallery.trim()) {
+        galleryArray = [gallery.trim()];
+      }
+    }
+    
+    // Handle sizes - parse from form data
+    let sizesArray = [];
+    if (sizes && typeof sizes === 'object') {
+      sizesArray = Object.keys(sizes)
+        .map(key => {
+          const size = sizes[key];
+          if (size && size.name && size.name.trim()) {
+            return {
+              name: size.name.trim(),
+              price: size.price && size.price.trim() ? parseFloat(size.price) : undefined,
+              description: size.description ? size.description.trim() : '',
+            };
+          }
+          return null;
+        })
+        .filter(size => size !== null);
+    }
     
     const product = await Product.findByIdAndUpdate(
       req.params.id,
       {
         name,
         description,
-        price: parseFloat(price),
+        price: price && price.trim() ? parseFloat(price) : null,
         isTaxable: isTaxable === 'on' || isTaxable === true,
         mainImage: mainImage || undefined,
         gallery: galleryArray,
+        sizes: sizesArray,
         status: status || 'draft',
       },
       { new: true, runValidators: true }

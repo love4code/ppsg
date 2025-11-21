@@ -71,7 +71,17 @@ exports.store = async (req, res) => {
   try {
     const { title, description, mainImage, gallery, status, location, date, tags } = req.body;
     
-    const galleryArray = Array.isArray(gallery) ? gallery : gallery ? [gallery] : [];
+    // Handle gallery - can be array, comma-separated string, or single value
+    let galleryArray = [];
+    if (gallery) {
+      if (Array.isArray(gallery)) {
+        galleryArray = gallery.filter(id => id && id.trim());
+      } else if (typeof gallery === 'string' && gallery.includes(',')) {
+        galleryArray = gallery.split(',').map(id => id.trim()).filter(id => id);
+      } else if (gallery.trim()) {
+        galleryArray = [gallery.trim()];
+      }
+    }
     
     const project = new Project({
       title,
@@ -114,7 +124,17 @@ exports.update = async (req, res) => {
   try {
     const { title, description, mainImage, gallery, status, location, date, tags } = req.body;
     
-    const galleryArray = Array.isArray(gallery) ? gallery : gallery ? [gallery] : [];
+    // Handle gallery - can be array, comma-separated string, or single value
+    let galleryArray = [];
+    if (gallery) {
+      if (Array.isArray(gallery)) {
+        galleryArray = gallery.filter(id => id && id.trim());
+      } else if (typeof gallery === 'string' && gallery.includes(',')) {
+        galleryArray = gallery.split(',').map(id => id.trim()).filter(id => id);
+      } else if (gallery.trim()) {
+        galleryArray = [gallery.trim()];
+      }
+    }
     
     const project = await Project.findByIdAndUpdate(
       req.params.id,

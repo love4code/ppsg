@@ -55,7 +55,15 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td>$<%= product.price.toFixed(2) %> <%= product.isTaxable ? '(taxable)' : '' %></td>
+                                <td>
+                                    <% if (product.price) { %>
+                                        $<%= product.price.toFixed(2) %> <%= product.isTaxable ? '(taxable)' : '' %>
+                                    <% } else if (product.sizes && product.sizes.length > 0) { %>
+                                        <small class="text-muted">Sizes available (<%= product.sizes.length %>)</small>
+                                    <% } else { %>
+                                        <span class="text-muted">No price set</span>
+                                    <% } %>
+                                </td>
                                 <td>
                                     <span class="badge bg-<%= product.status === 'published' ? 'success' : 'secondary' %>">
                                         <%= product.status %>

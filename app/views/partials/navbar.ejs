@@ -26,6 +26,13 @@
                 <li class="nav-item">
                     <a class="nav-link" href="/contact">Contact</a>
                 </li>
+                <% if (typeof currentUser !== 'undefined' && currentUser) { %>
+                <li class="nav-item">
+                    <a class="nav-link" href="/admin">
+                        <i class="bi bi-shield-lock"></i> Admin
+                    </a>
+                </li>
+                <% } %>
             </ul>
         </div>
     </div>

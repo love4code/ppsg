@@ -11,12 +11,33 @@
                 <p class="lead"><%= product.description %></p>
             </div>
 
-            <div class="mb-4">
-                <h3 class="text-primary">$<%= product.price.toFixed(2) %></h3>
-                <% if (product.isTaxable) { %>
-                    <p class="text-muted">Taxable</p>
-                <% } %>
-            </div>
+            <% if (product.sizes && product.sizes.length > 0) { %>
+                <div class="mb-4">
+                    <h4 class="mb-3">Available Sizes</h4>
+                    <div class="d-flex flex-wrap gap-2" id="sizesContainer">
+                        <% product.sizes.forEach((size, index) => { %>
+                            <button type="button" 
+                                    class="btn btn-outline-primary size-btn" 
+                                    data-size-name="<%= size.name %>"
+                                    data-size-price="<%= size.price || '' %>"
+                                    data-size-description="<%= size.description || '' %>"
+                                    onclick="selectSize(this)">
+                                <strong><%= size.name %></strong>
+                                <% if (size.price) { %>
+                                    - $<%= size.price.toFixed(2) %>
+                                <% } %>
+                                <% if (size.description) { %>
+                                    <br><small class="text-muted"><%= size.description %></small>
+                                <% } %>
+                            </button>
+                        <% }); %>
+                    </div>
+                    <div id="selectedSizes" class="mt-3" style="display: none;">
+                        <h5>Selected Sizes:</h5>
+                        <div id="selectedSizesList" class="d-flex flex-wrap gap-2 mb-2"></div>
+                    </div>
+                </div>
+            <% } %>
 
             <% if (product.gallery && product.gallery.length > 0) { %>
                 <h3 class="mt-5 mb-3">Product Gallery</h3>
@@ -30,17 +51,98 @@
             <% } %>
         </div>
         <div class="col-md-4">
-            <div class="card">
+            <div class="card mb-4">
                 <div class="card-body">
                     <h5>Product Information</h5>
                     <hr>
-                    <p><strong>Price:</strong> $<%= product.price.toFixed(2) %></p>
-                    <p><strong>Tax Status:</strong> <%= product.isTaxable ? 'Taxable' : 'Non-taxable' %></p>
                     <a href="/products" class="btn btn-primary w-100">Back to Products</a>
-                    <a href="/contact" class="btn btn-outline-primary w-100 mt-2">Contact Us</a>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="mb-3">Request Information</h5>
+                    <form action="/contact" method="POST" id="productContactForm">
+                        <input type="hidden" name="from" value="product">
+                        <input type="hidden" name="productId" value="<%= product._id %>">
+                        <input type="hidden" name="productName" value="<%= product.name %>">
+                        <input type="hidden" name="selectedSizes" id="selectedSizesInput" value="">
+
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Name *</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email *</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">Phone</label>
+                            <input type="tel" class="form-control" id="phone" name="phone">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="message" class="form-label">Message *</label>
+                            <textarea class="form-control" id="message" name="message" rows="4" required></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">Send Inquiry</button>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+let selectedSizes = [];
+
+function selectSize(button) {
+    const sizeName = button.getAttribute('data-size-name');
+    const sizePrice = button.getAttribute('data-size-price');
+    const sizeDescription = button.getAttribute('data-size-description');
+    
+    const sizeData = {
+        name: sizeName,
+        price: sizePrice,
+        description: sizeDescription
+    };
+    
+    // Toggle selection
+    const index = selectedSizes.findIndex(s => s.name === sizeName);
+    if (index > -1) {
+        // Remove if already selected
+        selectedSizes.splice(index, 1);
+        button.classList.remove('btn-primary');
+        button.classList.add('btn-outline-primary');
+    } else {
+        // Add if not selected
+        selectedSizes.push(sizeData);
+        button.classList.remove('btn-outline-primary');
+        button.classList.add('btn-primary');
+    }
+    
+    updateSelectedSizesDisplay();
+}
+
+function updateSelectedSizesDisplay() {
+    const container = document.getElementById('selectedSizes');
+    const list = document.getElementById('selectedSizesList');
+    const input = document.getElementById('selectedSizesInput');
+    
+    if (selectedSizes.length > 0) {
+        container.style.display = 'block';
+        list.innerHTML = selectedSizes.map(size => {
+            let priceText = size.price ? ` - $${parseFloat(size.price).toFixed(2)}` : '';
+            return `<span class="badge bg-primary">${size.name}${priceText}</span>`;
+        }).join('');
+        input.value = JSON.stringify(selectedSizes);
+    } else {
+        container.style.display = 'none';
+        input.value = '';
+    }
+}
+</script>
 
