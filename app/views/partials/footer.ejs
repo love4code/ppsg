@@ -25,6 +25,27 @@
                 <% } %>
             </div>
             <div class="col-md-8 text-md-end">
+                <% if (typeof socialMedia !== 'undefined' && socialMedia) { %>
+                    <div class="mb-3">
+                        <% const socialLinks = []; %>
+                        <% if (socialMedia.facebook) socialLinks.push({ url: socialMedia.facebook, icon: 'bi-facebook', name: 'Facebook' }); %>
+                        <% if (socialMedia.twitter) socialLinks.push({ url: socialMedia.twitter, icon: 'bi-twitter', name: 'Twitter' }); %>
+                        <% if (socialMedia.instagram) socialLinks.push({ url: socialMedia.instagram, icon: 'bi-instagram', name: 'Instagram' }); %>
+                        <% if (socialMedia.linkedin) socialLinks.push({ url: socialMedia.linkedin, icon: 'bi-linkedin', name: 'LinkedIn' }); %>
+                        <% if (socialMedia.youtube) socialLinks.push({ url: socialMedia.youtube, icon: 'bi-youtube', name: 'YouTube' }); %>
+                        <% if (socialMedia.tiktok) socialLinks.push({ url: socialMedia.tiktok, icon: 'bi-tiktok', name: 'TikTok' }); %>
+                        
+                        <% if (socialLinks.length > 0) { %>
+                            <div class="d-flex justify-content-md-end justify-content-start gap-3 mb-2">
+                                <% socialLinks.forEach(link => { %>
+                                    <a href="<%= link.url %>" target="_blank" rel="noopener noreferrer" class="text-light" title="<%= link.name %>" style="font-size: 1.5rem;">
+                                        <i class="bi <%= link.icon %>"></i>
+                                    </a>
+                                <% }); %>
+                            </div>
+                        <% } %>
+                    </div>
+                <% } %>
                 <p class="mb-0">
                     <% if (typeof companySettings !== 'undefined' && companySettings && companySettings.copyright) { %>
                         <%= companySettings.copyright %>

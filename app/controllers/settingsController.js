@@ -25,7 +25,7 @@ exports.index = async (req, res) => {
 
 exports.update = async (req, res) => {
   try {
-    const { theme, customColors, hero, company } = req.body;
+    const { theme, customColors, hero, company, socialMedia } = req.body;
     
     let settings = await Settings.findOne();
     if (!settings) {
@@ -69,6 +69,17 @@ exports.update = async (req, res) => {
         phone: company.phone || settings.company?.phone || '',
         email: company.email || settings.company?.email || '',
         copyright: company.copyright || settings.company?.copyright || '',
+      };
+    }
+    
+    if (socialMedia) {
+      settings.socialMedia = {
+        facebook: socialMedia.facebook || settings.socialMedia?.facebook || '',
+        twitter: socialMedia.twitter || settings.socialMedia?.twitter || '',
+        instagram: socialMedia.instagram || settings.socialMedia?.instagram || '',
+        linkedin: socialMedia.linkedin || settings.socialMedia?.linkedin || '',
+        youtube: socialMedia.youtube || settings.socialMedia?.youtube || '',
+        tiktok: socialMedia.tiktok || settings.socialMedia?.tiktok || '',
       };
     }
     

@@ -5,6 +5,7 @@ const loadSettings = async (req, res, next) => {
   try {
     const settings = await Settings.getSettings();
     res.locals.companySettings = settings.company || {};
+    res.locals.socialMedia = settings.socialMedia || {};
     res.locals.siteSettings = settings;
     next();
   } catch (error) {

@@ -108,6 +108,32 @@ const settingsSchema = new mongoose.Schema({
       default: '',
     },
   },
+  socialMedia: {
+    facebook: {
+      type: String,
+      default: '',
+    },
+    twitter: {
+      type: String,
+      default: '',
+    },
+    instagram: {
+      type: String,
+      default: '',
+    },
+    linkedin: {
+      type: String,
+      default: '',
+    },
+    youtube: {
+      type: String,
+      default: '',
+    },
+    tiktok: {
+      type: String,
+      default: '',
+    },
+  },
 }, {
   timestamps: true,
 });
