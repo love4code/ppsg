@@ -69,7 +69,7 @@ exports.create = async (req, res) => {
 
 exports.store = async (req, res) => {
   try {
-    const { name, description, price, startingAtPrice, manufacturer, materials, saltwaterCompatible, isTaxable, mainImage, gallery, status, sizes, featured } = req.body;
+    const { name, description, price, startingAtPrice, manufacturer, materials, saltwaterCompatible, isTaxable, mainImage, gallery, status, sizes, featured, metaTitle, metaDescription, keywords, ogImage } = req.body;
     
     // Handle gallery - can be array, comma-separated string, or single value
     let galleryArray = [];
@@ -99,6 +99,12 @@ exports.store = async (req, res) => {
           return null;
         })
         .filter(size => size !== null);
+    }
+    
+    // Handle keywords - parse from comma-separated string
+    let keywordsArray = [];
+    if (keywords && typeof keywords === 'string') {
+      keywordsArray = keywords.split(',').map(k => k.trim()).filter(k => k);
     }
     
     const product = new Product({
@@ -116,6 +122,10 @@ exports.store = async (req, res) => {
       sizes: sizesArray,
       status: status || 'draft',
       featured: featured === 'on' || featured === true,
+      metaTitle: metaTitle ? metaTitle.trim() : undefined,
+      metaDescription: metaDescription ? metaDescription.trim() : undefined,
+      keywords: keywordsArray,
+      ogImage: ogImage || undefined,
     });
 
     await product.save();
@@ -130,7 +140,7 @@ exports.store = async (req, res) => {
 
 exports.edit = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id).populate(['mainImage', 'gallery']);
+    const product = await Product.findById(req.params.id).populate(['mainImage', 'gallery', 'ogImage']);
     if (!product) {
       req.session.error = 'Product not found';
       return res.redirect('/admin/products');
@@ -145,7 +155,7 @@ exports.edit = async (req, res) => {
 
 exports.update = async (req, res) => {
   try {
-    const { name, description, price, startingAtPrice, manufacturer, materials, saltwaterCompatible, isTaxable, mainImage, gallery, status, sizes, featured } = req.body;
+    const { name, description, price, startingAtPrice, manufacturer, materials, saltwaterCompatible, isTaxable, mainImage, gallery, status, sizes, featured, metaTitle, metaDescription, keywords, ogImage } = req.body;
     
     // Handle gallery - can be array, comma-separated string, or single value
     let galleryArray = [];
@@ -175,6 +185,12 @@ exports.update = async (req, res) => {
           return null;
         })
         .filter(size => size !== null);
+    }
+    
+    // Handle keywords - parse from comma-separated string
+    let keywordsArray = [];
+    if (keywords && typeof keywords === 'string') {
+      keywordsArray = keywords.split(',').map(k => k.trim()).filter(k => k);
     }
     
     const product = await Product.findByIdAndUpdate(
@@ -193,6 +209,10 @@ exports.update = async (req, res) => {
         sizes: sizesArray,
         status: status || 'draft',
         featured: featured === 'on' || featured === true,
+        metaTitle: metaTitle ? metaTitle.trim() : null,
+        metaDescription: metaDescription ? metaDescription.trim() : null,
+        keywords: keywordsArray,
+        ogImage: ogImage || undefined,
       },
       { new: true, runValidators: true }
     );
@@ -252,13 +272,27 @@ exports.publicIndex = async (req, res) => {
 exports.publicShow = async (req, res) => {
   try {
     const product = await Product.findOne({ slug: req.params.slug, status: 'published' })
-      .populate(['mainImage', 'gallery']);
+      .populate(['mainImage', 'gallery', 'ogImage']);
     
     if (!product) {
       return res.status(404).render('errors/404');
     }
 
-    res.render('public/products/show', { product });
+    // Prepare SEO data
+    const ogImageObj = product.ogImage || product.mainImage;
+    const ogImageUrl = ogImageObj && ogImageObj._id 
+      ? `${req.protocol}://${req.get('host')}/admin/media/image/${ogImageObj._id}/large`
+      : null;
+    
+    const seoData = {
+      title: product.metaTitle || product.name,
+      description: product.metaDescription || product.description || '',
+      keywords: product.keywords && product.keywords.length > 0 ? product.keywords.join(', ') : '',
+      ogImage: ogImageUrl,
+      url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
+    };
+
+    res.render('public/products/show', { product, seoData });
   } catch (error) {
     res.status(500).render('errors/500', { error });
   }

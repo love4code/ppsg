@@ -72,6 +72,23 @@ const productSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  // SEO Fields
+  metaTitle: {
+    type: String,
+    trim: true,
+  },
+  metaDescription: {
+    type: String,
+    trim: true,
+  },
+  keywords: [{
+    type: String,
+    trim: true,
+  }],
+  ogImage: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Media',
+  },
 }, {
   timestamps: true,
 });

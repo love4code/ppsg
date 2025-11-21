@@ -69,7 +69,7 @@ exports.create = async (req, res) => {
 
 exports.store = async (req, res) => {
   try {
-    const { title, description, mainImage, gallery, status, location, date, tags } = req.body;
+    const { title, description, mainImage, gallery, status, location, date, tags, metaTitle, metaDescription, keywords, ogImage } = req.body;
     
     // Handle gallery - can be array, comma-separated string, or single value
     let galleryArray = [];
@@ -83,6 +83,12 @@ exports.store = async (req, res) => {
       }
     }
     
+    // Handle keywords - parse from comma-separated string
+    let keywordsArray = [];
+    if (keywords && typeof keywords === 'string') {
+      keywordsArray = keywords.split(',').map(k => k.trim()).filter(k => k);
+    }
+    
     const project = new Project({
       title,
       slug: title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
@@ -93,6 +99,10 @@ exports.store = async (req, res) => {
       location: location || '',
       date: date || undefined,
       tags: tags ? (Array.isArray(tags) ? tags : tags.split(',').map(t => t.trim())) : [],
+      metaTitle: metaTitle ? metaTitle.trim() : undefined,
+      metaDescription: metaDescription ? metaDescription.trim() : undefined,
+      keywords: keywordsArray,
+      ogImage: ogImage || undefined,
     });
 
     await project.save();
@@ -107,7 +117,7 @@ exports.store = async (req, res) => {
 
 exports.edit = async (req, res) => {
   try {
-    const project = await Project.findById(req.params.id).populate(['mainImage', 'gallery']);
+    const project = await Project.findById(req.params.id).populate(['mainImage', 'gallery', 'ogImage']);
     if (!project) {
       req.session.error = 'Project not found';
       return res.redirect('/admin/projects');
@@ -122,7 +132,7 @@ exports.edit = async (req, res) => {
 
 exports.update = async (req, res) => {
   try {
-    const { title, description, mainImage, gallery, status, location, date, tags } = req.body;
+    const { title, description, mainImage, gallery, status, location, date, tags, metaTitle, metaDescription, keywords, ogImage } = req.body;
     
     // Handle gallery - can be array, comma-separated string, or single value
     let galleryArray = [];
@@ -136,6 +146,12 @@ exports.update = async (req, res) => {
       }
     }
     
+    // Handle keywords - parse from comma-separated string
+    let keywordsArray = [];
+    if (keywords && typeof keywords === 'string') {
+      keywordsArray = keywords.split(',').map(k => k.trim()).filter(k => k);
+    }
+    
     const project = await Project.findByIdAndUpdate(
       req.params.id,
       {
@@ -147,6 +163,10 @@ exports.update = async (req, res) => {
         location: location || '',
         date: date || undefined,
         tags: tags ? (Array.isArray(tags) ? tags : tags.split(',').map(t => t.trim())) : [],
+        metaTitle: metaTitle ? metaTitle.trim() : null,
+        metaDescription: metaDescription ? metaDescription.trim() : null,
+        keywords: keywordsArray,
+        ogImage: ogImage || undefined,
       },
       { new: true, runValidators: true }
     );
@@ -206,13 +226,27 @@ exports.publicIndex = async (req, res) => {
 exports.publicShow = async (req, res) => {
   try {
     const project = await Project.findOne({ slug: req.params.slug, status: 'published' })
-      .populate(['mainImage', 'gallery']);
+      .populate(['mainImage', 'gallery', 'ogImage']);
     
     if (!project) {
       return res.status(404).render('errors/404');
     }
 
-    res.render('public/projects/show', { project });
+    // Prepare SEO data
+    const ogImageObj = project.ogImage || project.mainImage;
+    const ogImageUrl = ogImageObj && ogImageObj._id 
+      ? `${req.protocol}://${req.get('host')}/admin/media/image/${ogImageObj._id}/large`
+      : null;
+    
+    const seoData = {
+      title: project.metaTitle || project.title,
+      description: project.metaDescription || project.description || '',
+      keywords: project.keywords && project.keywords.length > 0 ? project.keywords.join(', ') : '',
+      ogImage: ogImageUrl,
+      url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
+    };
+
+    res.render('public/projects/show', { project, seoData });
   } catch (error) {
     res.status(500).render('errors/500', { error });
   }
