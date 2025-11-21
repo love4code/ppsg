@@ -15,7 +15,7 @@
                         </p>
                     <% } %>
                     <% if (companySettings.phone) { %>
-                        <p class="mb-1"><i class="bi bi-telephone"></i> <%= companySettings.phone %></p>
+                        <p class="mb-1"><i class="bi bi-telephone"></i> <span class="text-light" style="color: white !important; text-decoration: none !important;"><%= companySettings.phone %></span></p>
                     <% } %>
                     <% if (companySettings.email) { %>
                         <p class="mb-0"><i class="bi bi-envelope"></i> <a href="mailto:<%= companySettings.email %>" class="text-light"><%= companySettings.email %></a></p>
