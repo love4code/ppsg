@@ -4,7 +4,7 @@
             <h1 class="mb-3"><%= product.name %></h1>
             
             <% if (product.mainImage) { %>
-                <img src="/admin/media/image/<%= product.mainImage._id %>/large" class="img-fluid rounded mb-4" alt="<%= product.name %>">
+                <img src="/admin/media/image/<%= product.mainImage._id %>/thumbnail" class="img-fluid rounded mb-4" alt="<%= product.name %>">
             <% } %>
 
             <% if (product.description) { %>
@@ -46,7 +46,7 @@
                 <div class="row g-3">
                     <% product.gallery.forEach(image => { %>
                         <div class="col-md-6">
-                            <img src="/admin/media/image/<%= image._id %>/medium" class="img-fluid rounded" alt="Product gallery image">
+                            <img src="/admin/media/image/<%= image._id %>/thumbnail" class="img-fluid rounded" alt="Product gallery image">
                         </div>
                     <% }); %>
                 </div>

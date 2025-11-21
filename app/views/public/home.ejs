@@ -76,14 +76,10 @@
                                 <% if (service.basePrice) { %>
                                     <p class="text-primary fw-bold mb-3">Starting at $<%= service.basePrice.toFixed(2) %></p>
                                 <% } %>
-                                <a href="/services/<%= service.slug %>" class="btn btn-primary mt-auto">Learn More</a>
                             </div>
                         </div>
                     </div>
                 <% }); %>
-            </div>
-            <div class="text-center mt-4">
-                <a href="/services" class="btn btn-outline-primary">View All Services</a>
             </div>
         </div>
     </section>
