@@ -25,11 +25,28 @@
                 <% media.forEach(item => { %>
                     <div class="col-md-3 col-sm-4 col-6">
                         <div class="card">
-                            <img src="/admin/media/image/<%= item._id %>/small" class="card-img-top" alt="<%= item.altText || item.title || item.originalFilename %>" style="height: 200px; object-fit: cover;">
+                            <img src="/admin/media/image/<%= item._id %>/thumbnail" class="card-img-top" alt="<%= item.altText || item.title || item.originalFilename %>" style="height: 200px; object-fit: cover;">
                             <div class="card-body p-2">
-                                <p class="card-text small mb-1 text-truncate" title="<%= item.originalFilename %>">
+                                <p class="card-text small mb-2 text-truncate" title="<%= item.originalFilename %>">
                                     <%= item.originalFilename %>
                                 </p>
+                                
+                                <!-- Image Size URLs -->
+                                <div class="mb-2">
+                                    <small class="text-muted d-block mb-1">Image URLs:</small>
+                                    <div class="btn-group-vertical btn-group-sm w-100" role="group">
+                                        <button type="button" class="btn btn-outline-secondary btn-sm text-start" onclick="copyImageUrl('<%= typeof baseUrl !== 'undefined' ? baseUrl : '' %>/admin/media/image/<%= item._id %>/thumbnail', this)" title="Click to copy">
+                                            <i class="bi bi-link-45deg"></i> Thumbnail
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm text-start" onclick="copyImageUrl('<%= typeof baseUrl !== 'undefined' ? baseUrl : '' %>/admin/media/image/<%= item._id %>/medium', this)" title="Click to copy">
+                                            <i class="bi bi-link-45deg"></i> Medium
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm text-start" onclick="copyImageUrl('<%= typeof baseUrl !== 'undefined' ? baseUrl : '' %>/admin/media/image/<%= item._id %>/large', this)" title="Click to copy">
+                                            <i class="bi bi-link-45deg"></i> Large
+                                        </button>
+                                    </div>
+                                </div>
+                                
                                 <div class="btn-group btn-group-sm w-100" role="group">
                                     <a href="/admin/media/<%= item._id %>" class="btn btn-outline-primary" title="View & Edit">
                                         <i class="bi bi-pencil"></i>
@@ -370,6 +387,51 @@ if (uploadModal) {
         document.getElementById('startUpload').disabled = false;
         document.getElementById('startUpload').innerHTML = '<i class="bi bi-upload"></i> Start Upload';
     });
+}
+
+// Copy image URL to clipboard
+function copyImageUrl(url, button) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(() => {
+            const originalHTML = button.innerHTML;
+            button.innerHTML = '<i class="bi bi-check"></i> Copied!';
+            button.classList.remove('btn-outline-secondary');
+            button.classList.add('btn-success');
+            
+            setTimeout(() => {
+                button.innerHTML = originalHTML;
+                button.classList.remove('btn-success');
+                button.classList.add('btn-outline-secondary');
+            }, 2000);
+        }).catch(err => {
+            console.error('Failed to copy:', err);
+            alert('Failed to copy URL. URL: ' + url);
+        });
+    } else {
+        // Fallback for older browsers
+        const textarea = document.createElement('textarea');
+        textarea.value = url;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+            document.execCommand('copy');
+            const originalHTML = button.innerHTML;
+            button.innerHTML = '<i class="bi bi-check"></i> Copied!';
+            button.classList.remove('btn-outline-secondary');
+            button.classList.add('btn-success');
+            
+            setTimeout(() => {
+                button.innerHTML = originalHTML;
+                button.classList.remove('btn-success');
+                button.classList.add('btn-outline-secondary');
+            }, 2000);
+        } catch (err) {
+            alert('Failed to copy URL. URL: ' + url);
+        }
+        document.body.removeChild(textarea);
+    }
 }
 </script>
 

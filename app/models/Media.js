@@ -27,6 +27,13 @@ const mediaSchema = new mongoose.Schema({
     required: true,
   },
   sizes: {
+    // New naming: thumbnail
+    thumbnail: {
+      data: Buffer,
+      width: Number,
+      height: Number,
+    },
+    // Legacy naming: small (for backward compatibility with old uploads)
     small: {
       data: Buffer,
       width: Number,

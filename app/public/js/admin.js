@@ -9,15 +9,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 5000);
     });
 
-    // Confirm delete actions
-    const deleteForms = document.querySelectorAll('form[onsubmit*="confirm"]');
-    deleteForms.forEach(form => {
-        form.addEventListener('submit', function(e) {
-            if (!confirm('Are you sure you want to delete this item?')) {
-                e.preventDefault();
-            }
-        });
-    });
+    // Delete confirmation is handled inline in forms via onsubmit attribute
+    // No need for additional JavaScript handler to avoid duplicate prompts
 
     // Mobile sidebar toggle
     const sidebar = document.getElementById('adminSidebar');

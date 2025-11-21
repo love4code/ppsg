@@ -70,10 +70,10 @@
             </div>
             <div class="card-body">
                 <div class="mb-3">
-                    <label class="form-label fw-bold">Small (300px width):</label>
+                    <label class="form-label fw-bold">Thumbnail (300px width):</label>
                     <div class="input-group">
-                        <input type="text" class="form-control" id="url-small" value="<%= req.protocol %>://<%= req.get('host') %>/admin/media/image/<%= media._id %>/small" readonly>
-                        <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard('url-small')">
+                        <input type="text" class="form-control" id="url-thumbnail" value="<%= req.protocol %>://<%= req.get('host') %>/admin/media/image/<%= media._id %>/thumbnail" readonly>
+                        <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard('url-thumbnail')">
                             <i class="bi bi-clipboard"></i> Copy
                         </button>
                     </div>

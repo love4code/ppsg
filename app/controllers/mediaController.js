@@ -1,20 +1,28 @@
 const Media = require('../models/Media');
 const sharp = require('sharp');
 
-// Process and save image in multiple sizes
+// Process and save image in multiple sizes with compression
 const processImage = async (buffer) => {
   const sizes = {
-    small: { width: 300 },
-    medium: { width: 800 },
-    large: { width: 1200 },
+    thumbnail: { width: 300, quality: 80 },
+    medium: { width: 800, quality: 85 },
+    large: { width: 1200, quality: 90 },
   };
 
   const processed = {};
   
   for (const [size, config] of Object.entries(sizes)) {
+    // Resize and compress image
     const image = await sharp(buffer)
-      .resize(config.width, null, { withoutEnlargement: true })
-      .jpeg({ quality: 85 })
+      .resize(config.width, null, { 
+        withoutEnlargement: true,
+        fit: 'inside'
+      })
+      .jpeg({ 
+        quality: config.quality,
+        progressive: true,
+        mozjpeg: true // Better compression
+      })
       .toBuffer();
     
     const metadata = await sharp(image).metadata();
@@ -47,7 +55,7 @@ exports.index = async (req, res) => {
 
     // Don't load Buffer data in list view to save memory
     const media = await Media.find(query)
-      .select('-sizes.small.data -sizes.medium.data -sizes.large.data')
+      .select('-sizes.thumbnail.data -sizes.medium.data -sizes.large.data')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
@@ -55,11 +63,15 @@ exports.index = async (req, res) => {
     const total = await Media.countDocuments(query);
     const totalPages = Math.ceil(total / limit);
 
+    // Construct base URL for image links
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+
     res.render('admin/media/index', {
       media,
       currentPage: page,
       totalPages,
       search,
+      baseUrl, // Pass base URL for image links
     });
   } catch (error) {
     req.session.error = 'Error loading media library';
@@ -85,12 +97,12 @@ exports.upload = async (req, res) => {
         const processedSizes = await processImage(file.buffer);
         
         // Validate that we have image data
-        if (!processedSizes.small || !processedSizes.small.data) {
+        if (!processedSizes.thumbnail || !processedSizes.thumbnail.data) {
           throw new Error('Failed to process image');
         }
         
         // Calculate total size to check MongoDB 16MB limit
-        const totalSize = (processedSizes.small.data.length + 
+        const totalSize = (processedSizes.thumbnail.data.length + 
                           processedSizes.medium.data.length + 
                           processedSizes.large.data.length) / (1024 * 1024); // Size in MB
         
@@ -109,7 +121,7 @@ exports.upload = async (req, res) => {
         
         // Verify the data was saved by checking one size
         const verifyMedia = await Media.findById(savedMedia._id);
-        if (!verifyMedia || !verifyMedia.sizes.small || !Buffer.isBuffer(verifyMedia.sizes.small.data)) {
+        if (!verifyMedia || !verifyMedia.sizes.thumbnail || !Buffer.isBuffer(verifyMedia.sizes.thumbnail.data)) {
           throw new Error('Image data not properly saved to database');
         }
         
@@ -162,19 +174,32 @@ exports.delete = async (req, res) => {
 exports.getImage = async (req, res) => {
   try {
     const { id, size } = req.params;
-    const media = await Media.findById(id).select(`sizes.${size}`);
+    
+    // Support backward compatibility: map 'small' to 'thumbnail', and check both for old media
+    let sizeKey = size === 'small' ? 'thumbnail' : size;
+    
+    // Load all sizes to check for backward compatibility
+    const media = await Media.findById(id).select('sizes');
     
     if (!media) {
       console.error(`Media not found: ${id}`);
       return res.status(404).send('Image not found');
     }
     
-    if (!media.sizes || !media.sizes[size] || !media.sizes[size].data) {
-      console.error(`Size ${size} not found for media ${id}`);
+    // For thumbnail requests, check both 'thumbnail' and 'small' (for old media)
+    if (sizeKey === 'thumbnail' && (!media.sizes || !media.sizes.thumbnail || !media.sizes.thumbnail.data)) {
+      // Fall back to 'small' if 'thumbnail' doesn't exist (old media)
+      if (media.sizes && media.sizes.small && media.sizes.small.data) {
+        sizeKey = 'small';
+      }
+    }
+    
+    if (!media.sizes || !media.sizes[sizeKey] || !media.sizes[sizeKey].data) {
+      console.error(`Size ${sizeKey} not found for media ${id}`);
       return res.status(404).send('Image size not found');
     }
 
-    const imageBuffer = media.sizes[size].data;
+    const imageBuffer = media.sizes[sizeKey].data;
     
     // Ensure it's a Buffer
     if (!Buffer.isBuffer(imageBuffer)) {
@@ -276,7 +301,7 @@ exports.getAll = async (req, res) => {
   try {
     // Don't load Buffer data to save memory and bandwidth
     const media = await Media.find()
-      .select('-sizes.small.data -sizes.medium.data -sizes.large.data')
+      .select('-sizes.thumbnail.data -sizes.medium.data -sizes.large.data')
       .sort({ createdAt: -1 })
       .limit(100);
     res.json(media);

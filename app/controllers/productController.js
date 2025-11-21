@@ -278,21 +278,8 @@ exports.publicShow = async (req, res) => {
       return res.status(404).render('errors/404');
     }
 
-    // Prepare SEO data
-    const ogImageObj = product.ogImage || product.mainImage;
-    const ogImageUrl = ogImageObj && ogImageObj._id 
-      ? `${req.protocol}://${req.get('host')}/admin/media/image/${ogImageObj._id}/large`
-      : null;
-    
-    const seoData = {
-      title: product.metaTitle || product.name,
-      description: product.metaDescription || product.description || '',
-      keywords: product.keywords && product.keywords.length > 0 ? product.keywords.join(', ') : '',
-      ogImage: ogImageUrl,
-      url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
-    };
-
-    res.render('public/products/show', { product, seoData });
+    // Don't pass seoData to prevent metadata from showing on product pages
+    res.render('public/products/show', { product });
   } catch (error) {
     res.status(500).render('errors/500', { error });
   }
