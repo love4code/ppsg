@@ -45,7 +45,9 @@ exports.index = async (req, res) => {
         }
       : {};
 
+    // Don't load Buffer data in list view to save memory
     const media = await Media.find(query)
+      .select('-sizes.small.data -sizes.medium.data -sizes.large.data')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
@@ -79,19 +81,48 @@ exports.upload = async (req, res) => {
     }
 
     const uploadPromises = files.map(async (file) => {
-      const processedSizes = await processImage(file.buffer);
-      
-      const media = new Media({
-        originalFilename: file.originalname,
-        title: file.originalname.replace(/\.[^/.]+$/, ''),
-        mimeType: file.mimetype,
-        sizes: processedSizes,
-      });
+      try {
+        const processedSizes = await processImage(file.buffer);
+        
+        // Validate that we have image data
+        if (!processedSizes.small || !processedSizes.small.data) {
+          throw new Error('Failed to process image');
+        }
+        
+        // Calculate total size to check MongoDB 16MB limit
+        const totalSize = (processedSizes.small.data.length + 
+                          processedSizes.medium.data.length + 
+                          processedSizes.large.data.length) / (1024 * 1024); // Size in MB
+        
+        if (totalSize > 15) { // Leave some room under 16MB limit
+          throw new Error(`Image too large (${totalSize.toFixed(2)}MB). Total size must be under 15MB.`);
+        }
+        
+        const media = new Media({
+          originalFilename: file.originalname,
+          title: file.originalname.replace(/\.[^/.]+$/, ''),
+          mimeType: file.mimetype,
+          sizes: processedSizes,
+        });
 
-      return media.save();
+        const savedMedia = await media.save();
+        
+        // Verify the data was saved by checking one size
+        const verifyMedia = await Media.findById(savedMedia._id);
+        if (!verifyMedia || !verifyMedia.sizes.small || !Buffer.isBuffer(verifyMedia.sizes.small.data)) {
+          throw new Error('Image data not properly saved to database');
+        }
+        
+        console.log(`Image saved successfully: ${savedMedia._id}, total size: ${totalSize.toFixed(2)}MB`);
+        return savedMedia;
+      } catch (error) {
+        console.error(`Error processing file ${file.originalname}:`, error.message || error);
+        throw error;
+      }
     });
 
-    await Promise.all(uploadPromises);
+    const savedMedia = await Promise.all(uploadPromises);
+    console.log(`Successfully saved ${savedMedia.length} media file(s)`);
     
     // Return JSON for AJAX requests
     if (req.xhr || req.headers.accept && req.headers.accept.indexOf('json') > -1) {
@@ -131,15 +162,31 @@ exports.delete = async (req, res) => {
 exports.getImage = async (req, res) => {
   try {
     const { id, size } = req.params;
-    const media = await Media.findById(id);
+    const media = await Media.findById(id).select(`sizes.${size}`);
     
-    if (!media || !media.sizes[size]) {
+    if (!media) {
+      console.error(`Media not found: ${id}`);
       return res.status(404).send('Image not found');
+    }
+    
+    if (!media.sizes || !media.sizes[size] || !media.sizes[size].data) {
+      console.error(`Size ${size} not found for media ${id}`);
+      return res.status(404).send('Image size not found');
+    }
+
+    const imageBuffer = media.sizes[size].data;
+    
+    // Ensure it's a Buffer
+    if (!Buffer.isBuffer(imageBuffer)) {
+      console.error(`Image data is not a Buffer for media ${id}, size ${size}`);
+      return res.status(500).send('Invalid image data');
     }
 
     res.contentType('image/jpeg');
-    res.send(media.sizes[size].data);
+    res.set('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
+    res.send(imageBuffer);
   } catch (error) {
+    console.error('Error loading image:', error);
     res.status(500).send('Error loading image');
   }
 };
@@ -227,9 +274,14 @@ exports.update = async (req, res) => {
 
 exports.getAll = async (req, res) => {
   try {
-    const media = await Media.find().sort({ createdAt: -1 }).limit(100);
+    // Don't load Buffer data to save memory and bandwidth
+    const media = await Media.find()
+      .select('-sizes.small.data -sizes.medium.data -sizes.large.data')
+      .sort({ createdAt: -1 })
+      .limit(100);
     res.json(media);
   } catch (error) {
+    console.error('Error fetching media:', error);
     res.status(500).json({ error: 'Error fetching media' });
   }
 };

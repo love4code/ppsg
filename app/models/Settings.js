@@ -74,6 +74,40 @@ const settingsSchema = new mongoose.Schema({
       enum: ['small', 'medium', 'large', 'full'],
     },
   },
+  company: {
+    name: {
+      type: String,
+      default: '',
+    },
+    address: {
+      type: String,
+      default: '',
+    },
+    city: {
+      type: String,
+      default: '',
+    },
+    state: {
+      type: String,
+      default: '',
+    },
+    zipCode: {
+      type: String,
+      default: '',
+    },
+    phone: {
+      type: String,
+      default: '',
+    },
+    email: {
+      type: String,
+      default: '',
+    },
+    copyright: {
+      type: String,
+      default: '',
+    },
+  },
 }, {
   timestamps: true,
 });

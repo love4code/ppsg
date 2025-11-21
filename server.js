@@ -59,6 +59,10 @@ app.use((req, res, next) => {
   next();
 });
 
+// Load settings for all views
+const { loadSettings } = require('./app/middleware/settings');
+app.use(loadSettings);
+
 // View engine setup
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'app/views'));

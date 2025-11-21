@@ -1,12 +1,37 @@
 <footer class="bg-dark text-light py-4 mt-5">
     <div class="container">
         <div class="row">
-            <div class="col-md-6">
-                <h5>PPSG</h5>
-                <p class="mb-0">Your trusted partner for quality services.</p>
+            <div class="col-md-4">
+                <h5><%= typeof companySettings !== 'undefined' && companySettings && companySettings.name ? companySettings.name : 'PPSG' %></h5>
+                <% if (typeof companySettings !== 'undefined' && companySettings) { %>
+                    <% if (companySettings.address) { %>
+                        <p class="mb-1"><%= companySettings.address %></p>
+                    <% } %>
+                    <% if (companySettings.city || companySettings.state || companySettings.zipCode) { %>
+                        <p class="mb-1">
+                            <%= companySettings.city ? companySettings.city : '' %><%= companySettings.city && companySettings.state ? ', ' : '' %>
+                            <%= companySettings.state ? companySettings.state : '' %>
+                            <%= companySettings.zipCode ? companySettings.zipCode : '' %>
+                        </p>
+                    <% } %>
+                    <% if (companySettings.phone) { %>
+                        <p class="mb-1"><i class="bi bi-telephone"></i> <%= companySettings.phone %></p>
+                    <% } %>
+                    <% if (companySettings.email) { %>
+                        <p class="mb-0"><i class="bi bi-envelope"></i> <a href="mailto:<%= companySettings.email %>" class="text-light"><%= companySettings.email %></a></p>
+                    <% } %>
+                <% } else { %>
+                    <p class="mb-0">Your trusted partner for quality services.</p>
+                <% } %>
             </div>
-            <div class="col-md-6 text-md-end">
-                <p class="mb-0">&copy; <%= new Date().getFullYear() %> PPSG. All rights reserved.</p>
+            <div class="col-md-8 text-md-end">
+                <p class="mb-0">
+                    <% if (typeof companySettings !== 'undefined' && companySettings && companySettings.copyright) { %>
+                        <%= companySettings.copyright %>
+                    <% } else { %>
+                        &copy; <%= new Date().getFullYear() %> <%= typeof companySettings !== 'undefined' && companySettings && companySettings.name ? companySettings.name : 'PPSG' %>. All rights reserved.
+                    <% } %>
+                </p>
             </div>
         </div>
     </div>

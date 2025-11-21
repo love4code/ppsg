@@ -47,7 +47,26 @@
             <div class="mt-5">
                 <h3>Contact Information</h3>
                 <p class="text-muted">For immediate assistance, please contact us directly.</p>
-                <p><strong>Email:</strong> aquarianpoolandspa@gmail.com</p>
+                <% if (typeof companySettings !== 'undefined' && companySettings) { %>
+                    <% if (companySettings.address) { %>
+                        <p><strong>Address:</strong><br>
+                            <%= companySettings.address %><br>
+                            <% if (companySettings.city || companySettings.state || companySettings.zipCode) { %>
+                                <%= companySettings.city ? companySettings.city : '' %><%= companySettings.city && companySettings.state ? ', ' : '' %>
+                                <%= companySettings.state ? companySettings.state : '' %>
+                                <%= companySettings.zipCode ? companySettings.zipCode : '' %>
+                            <% } %>
+                        </p>
+                    <% } %>
+                    <% if (companySettings.phone) { %>
+                        <p><strong>Phone:</strong> <%= companySettings.phone %></p>
+                    <% } %>
+                    <% if (companySettings.email) { %>
+                        <p><strong>Email:</strong> <a href="mailto:<%= companySettings.email %>"><%= companySettings.email %></a></p>
+                    <% } %>
+                <% } else { %>
+                    <p><strong>Email:</strong> aquarianpoolandspa@gmail.com</p>
+                <% } %>
             </div>
         </div>
     </div>

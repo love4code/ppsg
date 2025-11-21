@@ -25,7 +25,7 @@ exports.index = async (req, res) => {
 
 exports.update = async (req, res) => {
   try {
-    const { theme, customColors, hero } = req.body;
+    const { theme, customColors, hero, company } = req.body;
     
     let settings = await Settings.findOne();
     if (!settings) {
@@ -56,6 +56,19 @@ exports.update = async (req, res) => {
         backgroundImage: hero.backgroundImage || settings.hero?.backgroundImage || undefined,
         overlayOpacity: parseFloat(hero.overlayOpacity) || settings.hero?.overlayOpacity || 0.5,
         height: hero.height || settings.hero?.height || 'medium',
+      };
+    }
+    
+    if (company) {
+      settings.company = {
+        name: company.name || settings.company?.name || '',
+        address: company.address || settings.company?.address || '',
+        city: company.city || settings.company?.city || '',
+        state: company.state || settings.company?.state || '',
+        zipCode: company.zipCode || settings.company?.zipCode || '',
+        phone: company.phone || settings.company?.phone || '',
+        email: company.email || settings.company?.email || '',
+        copyright: company.copyright || settings.company?.copyright || '',
       };
     }
     
