@@ -134,6 +134,10 @@ const settingsSchema = new mongoose.Schema({
       default: '',
     },
   },
+  logo: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Media',
+  },
 }, {
   timestamps: true,
 });

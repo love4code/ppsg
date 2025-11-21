@@ -327,6 +327,34 @@
                         </div>
                     </div>
 
+                    <hr class="my-4">
+                    
+                    <h5 class="mb-3"><i class="bi bi-image"></i> Site Logo</h5>
+                    <p class="text-muted small mb-3">Upload a logo to display in the navbar. If no logo is uploaded, a water icon will be displayed instead.</p>
+                    
+                    <div class="mb-3">
+                        <label for="logo" class="form-label">Logo Image</label>
+                        <input type="hidden" id="logo" name="logo" value="<%= settings.logo ? (settings.logo._id || settings.logo) : '' %>">
+                        <div class="d-flex gap-2 mb-2">
+                            <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#logoModal">
+                                <i class="bi bi-images"></i> Choose from Media Library
+                            </button>
+                            <button type="button" class="btn btn-outline-danger" id="clearLogo" style="display: <%= settings.logo ? 'block' : 'none' %>;" onclick="clearLogo()">
+                                <i class="bi bi-x"></i> Clear Logo
+                            </button>
+                        </div>
+                        <div id="logoPreview" class="mt-2">
+                            <% if (settings.logo && settings.logo._id) { %>
+                                <img src="/admin/media/image/<%= settings.logo._id %>/medium" class="img-thumbnail" style="max-height: 100px; max-width: 200px; object-fit: contain;">
+                            <% } else { %>
+                                <div class="text-muted">
+                                    <i class="bi bi-droplet-fill" style="font-size: 2rem;"></i>
+                                    <p class="small mb-0">Water icon will be displayed</p>
+                                </div>
+                            <% } %>
+                        </div>
+                    </div>
+
                     <div class="mt-4">
                         <button type="submit" class="btn btn-primary">
                             <i class="bi bi-save"></i> Save Settings
@@ -356,6 +384,44 @@
                 <hr>
                 <h6>Custom Theme:</h6>
                 <p class="small mb-0">Select "Custom" to use color pickers and create your own unique theme. Changes apply immediately to both admin and public pages.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Logo Picker Modal -->
+<div class="modal fade" id="logoModal" tabindex="-1" aria-labelledby="logoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="logoModalLabel">Select Logo Image</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <input type="text" class="form-control" id="logoMediaSearch" placeholder="Search images...">
+                </div>
+                <div id="logoMediaGrid" class="row g-3" style="max-height: 500px; overflow-y: auto;">
+                    <% if (typeof media !== 'undefined' && media.length > 0) { %>
+                        <% media.forEach(item => { %>
+                            <div class="col-md-3">
+                                <div class="card media-item" data-id="<%= item._id %>" onclick="selectLogoImage('<%= item._id %>')" style="cursor: pointer;">
+                                    <img src="/admin/media/image/<%= item._id %>/small" class="card-img-top" alt="<%= item.originalFilename %>" style="height: 150px; object-fit: cover;">
+                                    <div class="card-body p-2">
+                                        <small class="text-muted d-block text-truncate"><%= item.title || item.originalFilename %></small>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }); %>
+                    <% } else { %>
+                        <div class="col-12">
+                            <p class="text-center text-muted">No images available. Upload images in the Media Library first.</p>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
             </div>
         </div>
     </div>
@@ -476,6 +542,66 @@ function clearHeroImage() {
     document.getElementById('heroBackgroundImage').value = '';
     document.getElementById('heroImagePreview').innerHTML = '';
     document.getElementById('clearHeroImage').style.display = 'none';
+}
+
+// Logo image picker
+function selectLogoImage(imageId) {
+    document.getElementById('logo').value = imageId;
+    const preview = document.getElementById('logoPreview');
+    preview.innerHTML = `<img src="/admin/media/image/${imageId}/medium" class="img-thumbnail" style="max-height: 100px; max-width: 200px; object-fit: contain;">`;
+    document.getElementById('clearLogo').style.display = 'block';
+    
+    // Close modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('logoModal'));
+    if (modal) {
+        modal.hide();
+    }
+}
+
+function clearLogo() {
+    document.getElementById('logo').value = '';
+    const preview = document.getElementById('logoPreview');
+    preview.innerHTML = `
+        <div class="text-muted">
+            <i class="bi bi-droplet-fill" style="font-size: 2rem;"></i>
+            <p class="small mb-0">Water icon will be displayed</p>
+        </div>
+    `;
+    document.getElementById('clearLogo').style.display = 'none';
+}
+
+// Logo media search
+if (document.getElementById('logoMediaSearch')) {
+    document.getElementById('logoMediaSearch').addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const filtered = allMedia.filter(item => 
+            item.originalFilename.toLowerCase().includes(searchTerm) ||
+            (item.title && item.title.toLowerCase().includes(searchTerm)) ||
+            (item.altText && item.altText.toLowerCase().includes(searchTerm))
+        );
+        renderLogoMediaGrid(filtered);
+    });
+}
+
+function renderLogoMediaGrid(mediaItems) {
+    const grid = document.getElementById('logoMediaGrid');
+    if (!grid) return;
+    
+    if (mediaItems.length === 0) {
+        grid.innerHTML = '<div class="col-12"><p class="text-center text-muted">No images found.</p></div>';
+        return;
+    }
+    
+    grid.innerHTML = mediaItems.map(item => `
+        <div class="col-md-3">
+            <div class="card media-item" data-id="${item._id}" onclick="selectLogoImage('${item._id}')" style="cursor: pointer;">
+                <img src="/admin/media/image/${item._id}/small" class="card-img-top" alt="${item.originalFilename}" style="height: 150px; object-fit: cover;">
+                <div class="card-body p-2">
+                    <small class="text-muted d-block text-truncate">${item.title || item.originalFilename}</small>
+                </div>
+            </div>
+        </div>
+    `).join('');
 }
 
 // Hero media search

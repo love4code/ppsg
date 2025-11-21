@@ -1,7 +1,12 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
     <div class="container">
-        <a class="navbar-brand" href="/">
-            <i class="bi bi-building"></i> PPSG
+        <a class="navbar-brand d-flex align-items-center" href="/">
+            <% if (typeof siteLogo !== 'undefined' && siteLogo && siteLogo._id) { %>
+                <img src="/admin/media/image/<%= siteLogo._id %>/small" alt="<%= typeof companySettings !== 'undefined' && companySettings && companySettings.name ? companySettings.name : 'PPSG' %>" style="max-height: 40px; margin-right: 10px;">
+            <% } else { %>
+                <i class="bi bi-droplet-fill me-2"></i>
+            <% } %>
+            <span><%= typeof companySettings !== 'undefined' && companySettings && companySettings.name ? companySettings.name : 'PPSG' %></span>
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>

@@ -6,9 +6,12 @@ exports.index = async (req, res) => {
     const Media = require('../models/Media');
     const media = await Media.find().sort({ createdAt: -1 }).limit(50);
     
-    // Populate background image if it exists
+    // Populate background image and logo if they exist
     if (settings.hero && settings.hero.backgroundImage) {
       await settings.populate('hero.backgroundImage');
+    }
+    if (settings.logo) {
+      await settings.populate('logo');
     }
     
     res.render('admin/settings/index', { 
@@ -81,6 +84,14 @@ exports.update = async (req, res) => {
         youtube: socialMedia.youtube || settings.socialMedia?.youtube || '',
         tiktok: socialMedia.tiktok || settings.socialMedia?.tiktok || '',
       };
+    }
+    
+    // Handle logo
+    if (req.body.logo) {
+      settings.logo = req.body.logo || undefined;
+    } else if (req.body.logo === '') {
+      // Empty string means remove logo
+      settings.logo = undefined;
     }
     
     await settings.save();
