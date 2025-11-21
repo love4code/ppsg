@@ -16,7 +16,7 @@ exports.index = async (req, res) => {
       .limit(6)
       .lean();
 
-    const featuredProducts = await Product.find({ status: 'published' })
+    const featuredProducts = await Product.find({ status: 'published', featured: true })
       .populate('mainImage')
       .sort({ createdAt: -1 })
       .limit(6)

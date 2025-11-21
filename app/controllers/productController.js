@@ -69,7 +69,7 @@ exports.create = async (req, res) => {
 
 exports.store = async (req, res) => {
   try {
-    const { name, description, price, startingAtPrice, manufacturer, materials, saltwaterCompatible, isTaxable, mainImage, gallery, status, sizes } = req.body;
+    const { name, description, price, startingAtPrice, manufacturer, materials, saltwaterCompatible, isTaxable, mainImage, gallery, status, sizes, featured } = req.body;
     
     // Handle gallery - can be array, comma-separated string, or single value
     let galleryArray = [];
@@ -115,6 +115,7 @@ exports.store = async (req, res) => {
       gallery: galleryArray,
       sizes: sizesArray,
       status: status || 'draft',
+      featured: featured === 'on' || featured === true,
     });
 
     await product.save();
@@ -144,7 +145,7 @@ exports.edit = async (req, res) => {
 
 exports.update = async (req, res) => {
   try {
-    const { name, description, price, startingAtPrice, manufacturer, materials, saltwaterCompatible, isTaxable, mainImage, gallery, status, sizes } = req.body;
+    const { name, description, price, startingAtPrice, manufacturer, materials, saltwaterCompatible, isTaxable, mainImage, gallery, status, sizes, featured } = req.body;
     
     // Handle gallery - can be array, comma-separated string, or single value
     let galleryArray = [];
@@ -191,6 +192,7 @@ exports.update = async (req, res) => {
         gallery: galleryArray,
         sizes: sizesArray,
         status: status || 'draft',
+        featured: featured === 'on' || featured === true,
       },
       { new: true, runValidators: true }
     );
