@@ -3,10 +3,10 @@ const { sendContactEmail } = require('../config/email');
 
 exports.submit = async (req, res) => {
   try {
-    const { name, email, phone, message, reason, from, productId, productName, selectedSizes } = req.body;
+    const { name, email, phone, town, message, reason, from, productId, productName, selectedSizes } = req.body;
 
-    if (!name || !email || !message) {
-      req.session.error = 'Name, email, and message are required';
+    if (!name || !email || !message || !reason) {
+      req.session.error = 'Name, email, reason for contact, and message are required';
       // Redirect back to where form came from
       if (from === 'product' && productId) {
         return res.redirect(`/products/${productId}`);
@@ -18,6 +18,7 @@ exports.submit = async (req, res) => {
       name,
       email,
       phone: phone || '',
+      town: town || '',
       message,
       reason: reason || '',
       productId: productId || undefined,
@@ -43,6 +44,7 @@ exports.submit = async (req, res) => {
       name,
       email,
       phone,
+      town,
       message,
       reason,
       productName,

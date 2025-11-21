@@ -45,6 +45,36 @@
 
             <div class="row">
                 <div class="col-md-6 mb-3">
+                    <label for="startingAtPrice" class="form-label">Starting At Price (Optional)</label>
+                    <div class="input-group">
+                        <span class="input-group-text">$</span>
+                        <input type="number" class="form-control" id="startingAtPrice" name="startingAtPrice" step="0.01" min="0">
+                    </div>
+                    <small class="form-text text-muted">Display price (e.g., "Starting at $X")</small>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="manufacturer" class="form-label">Manufacturer</label>
+                    <input type="text" class="form-control" id="manufacturer" name="manufacturer" placeholder="e.g., Hayward, Pentair">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-8 mb-3">
+                    <label for="materials" class="form-label">Materials Pool is Made Of</label>
+                    <input type="text" class="form-control" id="materials" name="materials" placeholder="e.g., Vinyl, Fiberglass, Concrete">
+                    <small class="form-text text-muted">Comma-separated list of materials</small>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="saltwaterCompatible" class="form-label">Saltwater Compatible</label>
+                    <div class="form-check form-switch mt-2">
+                        <input class="form-check-input" type="checkbox" id="saltwaterCompatible" name="saltwaterCompatible">
+                        <label class="form-check-label" for="saltwaterCompatible">Yes, saltwater compatible</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
                     <label for="mainImage" class="form-label">Main Image</label>
                     <input type="hidden" id="mainImage" name="mainImage" value="">
                     <div class="d-flex gap-2 mb-2">

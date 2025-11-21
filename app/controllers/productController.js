@@ -69,7 +69,7 @@ exports.create = async (req, res) => {
 
 exports.store = async (req, res) => {
   try {
-    const { name, description, price, isTaxable, mainImage, gallery, status, sizes } = req.body;
+    const { name, description, price, startingAtPrice, manufacturer, materials, saltwaterCompatible, isTaxable, mainImage, gallery, status, sizes } = req.body;
     
     // Handle gallery - can be array, comma-separated string, or single value
     let galleryArray = [];
@@ -106,6 +106,10 @@ exports.store = async (req, res) => {
       slug: name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
       description,
       price: price && price.trim() ? parseFloat(price) : undefined,
+      startingAtPrice: startingAtPrice && startingAtPrice.trim() ? parseFloat(startingAtPrice) : undefined,
+      manufacturer: manufacturer ? manufacturer.trim() : undefined,
+      materials: materials ? materials.trim() : undefined,
+      saltwaterCompatible: saltwaterCompatible === 'on' || saltwaterCompatible === true,
       isTaxable: isTaxable === 'on' || isTaxable === true,
       mainImage: mainImage || undefined,
       gallery: galleryArray,
@@ -140,7 +144,7 @@ exports.edit = async (req, res) => {
 
 exports.update = async (req, res) => {
   try {
-    const { name, description, price, isTaxable, mainImage, gallery, status, sizes } = req.body;
+    const { name, description, price, startingAtPrice, manufacturer, materials, saltwaterCompatible, isTaxable, mainImage, gallery, status, sizes } = req.body;
     
     // Handle gallery - can be array, comma-separated string, or single value
     let galleryArray = [];
@@ -178,6 +182,10 @@ exports.update = async (req, res) => {
         name,
         description,
         price: price && price.trim() ? parseFloat(price) : null,
+        startingAtPrice: startingAtPrice && startingAtPrice.trim() ? parseFloat(startingAtPrice) : null,
+        manufacturer: manufacturer ? manufacturer.trim() : null,
+        materials: materials ? materials.trim() : null,
+        saltwaterCompatible: saltwaterCompatible === 'on' || saltwaterCompatible === true,
         isTaxable: isTaxable === 'on' || isTaxable === true,
         mainImage: mainImage || undefined,
         gallery: galleryArray,

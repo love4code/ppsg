@@ -159,16 +159,20 @@
                                     <input type="tel" class="form-control" id="phone" name="phone">
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label for="reason" class="form-label">Reason for Contact</label>
-                                    <select class="form-select" id="reason" name="reason">
-                                        <option value="">Select a reason</option>
-                                        <option value="general">General Inquiry</option>
-                                        <option value="quote">Request a Quote</option>
-                                        <option value="service">Service Question</option>
-                                        <option value="product">Product Question</option>
-                                        <option value="other">Other</option>
-                                    </select>
+                                    <label for="town" class="form-label">Town</label>
+                                    <input type="text" class="form-control" id="town" name="town">
                                 </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="reason" class="form-label">Reason for Contact *</label>
+                                <select class="form-select" id="reason" name="reason" required>
+                                    <option value="">Select a reason</option>
+                                    <option value="New Pool Consult">New Pool Consult</option>
+                                    <option value="Pool Replacement">Pool Replacement</option>
+                                    <option value="Liner Replacement">Liner Replacement</option>
+                                    <option value="Service Work">Service Work</option>
+                                </select>
                             </div>
                             
                             <div class="mb-3">

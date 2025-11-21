@@ -53,7 +53,23 @@
         <div class="col-md-4">
             <div class="card mb-4">
                 <div class="card-body">
-                    <h5>Product Information</h5>
+                    <h5>Product Details</h5>
+                    <hr>
+                    <% if (product.startingAtPrice) { %>
+                        <p class="mb-2"><strong>Starting At:</strong> $<%= product.startingAtPrice.toFixed(2) %></p>
+                    <% } %>
+                    <% if (product.manufacturer) { %>
+                        <p class="mb-2"><strong>Manufacturer:</strong> <%= product.manufacturer %></p>
+                    <% } %>
+                    <% if (product.materials) { %>
+                        <p class="mb-2"><strong>Materials:</strong> <%= product.materials %></p>
+                    <% } %>
+                    <% if (product.saltwaterCompatible) { %>
+                        <p class="mb-2">
+                            <strong>Saltwater Compatible:</strong> 
+                            <span class="badge bg-success">Yes</span>
+                        </p>
+                    <% } %>
                     <hr>
                     <a href="/products" class="btn btn-primary w-100">Back to Products</a>
                 </div>
@@ -81,6 +97,22 @@
                         <div class="mb-3">
                             <label for="phone" class="form-label">Phone</label>
                             <input type="tel" class="form-control" id="phone" name="phone">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="town" class="form-label">Town</label>
+                            <input type="text" class="form-control" id="town" name="town">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="reason" class="form-label">Reason for Contact *</label>
+                            <select class="form-select" id="reason" name="reason" required>
+                                <option value="">Select a reason</option>
+                                <option value="New Pool Consult">New Pool Consult</option>
+                                <option value="Pool Replacement">Pool Replacement</option>
+                                <option value="Liner Replacement">Liner Replacement</option>
+                                <option value="Service Work">Service Work</option>
+                            </select>
                         </div>
 
                         <div class="mb-3">

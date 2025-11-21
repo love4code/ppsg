@@ -20,6 +20,22 @@ const productSchema = new mongoose.Schema({
     type: Number,
     min: 0,
   },
+  startingAtPrice: {
+    type: Number,
+    min: 0,
+  },
+  manufacturer: {
+    type: String,
+    trim: true,
+  },
+  materials: {
+    type: String,
+    trim: true,
+  },
+  saltwaterCompatible: {
+    type: Boolean,
+    default: false,
+  },
   sizes: [{
     name: {
       type: String,

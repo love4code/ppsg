@@ -19,18 +19,25 @@
                 <strong>Phone:</strong> <%= contact.phone || 'Not provided' %>
             </div>
             <div class="col-md-6">
+                <strong>Town:</strong> <%= contact.town || 'Not provided' %>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <% if (contact.reason) { %>
+                    <strong>Reason for Contact:</strong> <%= contact.reason %>
+                <% } else { %>
+                    <strong>Reason for Contact:</strong> Not provided
+                <% } %>
+            </div>
+            <div class="col-md-6">
                 <strong>Status:</strong>
                 <span class="badge bg-<%= contact.status === 'new' ? 'danger' : 'success' %>">
                     <%= contact.status %>
                 </span>
             </div>
         </div>
-
-        <% if (contact.reason) { %>
-            <div class="mb-3">
-                <strong>Reason for Contact:</strong> <%= contact.reason %>
-            </div>
-        <% } %>
 
         <div class="mb-3">
             <strong>Date:</strong> <%= new Date(contact.createdAt).toLocaleString() %>

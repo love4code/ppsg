@@ -29,6 +29,8 @@
                         <th>Name</th>
                         <th>Email</th>
                         <th>Phone</th>
+                        <th>Town</th>
+                        <th>Reason</th>
                         <th>Status</th>
                         <th>Date</th>
                         <th>Actions</th>
@@ -41,6 +43,8 @@
                                 <td><strong><%= contact.name %></strong></td>
                                 <td><%= contact.email %></td>
                                 <td><%= contact.phone || 'N/A' %></td>
+                                <td><%= contact.town || 'N/A' %></td>
+                                <td><%= contact.reason || 'N/A' %></td>
                                 <td>
                                     <span class="badge bg-<%= contact.status === 'new' ? 'danger' : 'success' %>">
                                         <%= contact.status %>
@@ -56,7 +60,7 @@
                         <% }); %>
                     <% } else { %>
                         <tr>
-                            <td colspan="6" class="text-center text-muted py-4">No contacts found.</td>
+                            <td colspan="8" class="text-center text-muted py-4">No contacts found.</td>
                         </tr>
                     <% } %>
                 </tbody>

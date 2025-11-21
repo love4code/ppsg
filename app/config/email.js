@@ -35,9 +35,10 @@ const sendContactEmail = async (contactData) => {
       <p><strong>Name:</strong> ${contactData.name}</p>
       <p><strong>Email:</strong> ${contactData.email}</p>
       <p><strong>Phone:</strong> ${contactData.phone || 'Not provided'}</p>
+      ${contactData.town ? `<p><strong>Town:</strong> ${contactData.town}</p>` : ''}
+      ${contactData.reason ? `<p><strong>Reason for Contact:</strong> ${contactData.reason}</p>` : ''}
       ${contactData.productName ? `<p><strong>Product:</strong> ${contactData.productName}</p>` : ''}
       ${sizesHtml}
-      ${contactData.reason ? `<p><strong>Reason:</strong> ${contactData.reason}</p>` : ''}
       <p><strong>Message:</strong></p>
       <p>${contactData.message.replace(/\n/g, '<br>')}</p>
     `,
