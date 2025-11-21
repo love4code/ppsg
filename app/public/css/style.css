@@ -27,3 +27,26 @@ main {
     flex: 1;
 }
 
+/* Footer phone number styling for mobile */
+@media (max-width: 767.98px) {
+    footer .phone-number {
+        color: white !important;
+        text-decoration: none !important;
+    }
+}
+
+/* Ensure images display properly on mobile */
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+@media (max-width: 767.98px) {
+    img {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+}
+

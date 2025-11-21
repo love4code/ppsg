@@ -38,7 +38,7 @@
                     <div class="col-md-4">
                         <div class="card h-100 shadow-sm">
                             <% if (project.mainImage && project.mainImage._id) { %>
-                                <img src="/admin/media/image/<%= project.mainImage._id %>/medium" class="card-img-top" alt="<%= project.title || 'Project' %>" style="height: 250px; object-fit: cover;">
+                                <img src="/admin/media/image/<%= project.mainImage._id %>/medium" class="card-img-top" alt="<%= project.title || 'Project' %>" style="height: 250px; object-fit: cover;" loading="lazy" decoding="async">
                             <% } %>
                             <div class="card-body">
                                 <h5 class="card-title"><%= project.title %></h5>
@@ -95,7 +95,7 @@
                     <div class="col-md-4">
                         <div class="card h-100 shadow-sm">
                             <% if (product.mainImage && product.mainImage._id) { %>
-                                <img src="/admin/media/image/<%= product.mainImage._id %>/medium" class="card-img-top" alt="<%= product.name || 'Product' %>" style="height: 250px; object-fit: cover;">
+                                <img src="/admin/media/image/<%= product.mainImage._id %>/medium" class="card-img-top" alt="<%= product.name || 'Product' %>" style="height: 250px; object-fit: cover;" loading="lazy" decoding="async">
                             <% } %>
                             <div class="card-body">
                                 <h5 class="card-title"><%= product.name %></h5>

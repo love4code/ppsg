@@ -4,7 +4,7 @@
             <h1 class="mb-3"><%= project.title %></h1>
             
             <% if (project.mainImage) { %>
-                <img src="/admin/media/image/<%= project.mainImage._id %>/thumbnail" class="img-fluid rounded mb-4" alt="<%= project.title %>">
+                <img src="/admin/media/image/<%= project.mainImage._id %>/thumbnail" class="img-fluid rounded mb-4" alt="<%= project.title %>" loading="lazy" decoding="async">
             <% } %>
 
             <div class="mb-4">
@@ -33,7 +33,7 @@
                 <div class="row g-3">
                     <% project.gallery.forEach(image => { %>
                         <div class="col-md-6">
-                            <img src="/admin/media/image/<%= image._id %>/thumbnail" class="img-fluid rounded" alt="Gallery image">
+                            <img src="/admin/media/image/<%= image._id %>/thumbnail" class="img-fluid rounded" alt="Gallery image" loading="lazy" decoding="async">
                         </div>
                     <% }); %>
                 </div>
