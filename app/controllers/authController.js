@@ -23,8 +23,18 @@ exports.login = async (req, res) => {
 
     req.session.user = { id: user._id, username: user.username };
     req.session.success = 'Welcome back!';
-    res.redirect('/admin');
+    
+    // Explicitly save session before redirect
+    req.session.save((err) => {
+      if (err) {
+        console.error('Session save error:', err);
+        req.session.error = 'An error occurred during login';
+        return res.redirect('/admin/login');
+      }
+      res.redirect('/admin');
+    });
   } catch (error) {
+    console.error('Login error:', error);
     req.session.error = 'An error occurred during login';
     res.redirect('/admin/login');
   }
