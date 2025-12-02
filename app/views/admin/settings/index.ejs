@@ -466,27 +466,40 @@
 </div>
 
 <script>
-const allMedia = <%= typeof media !== 'undefined' ? JSON.stringify(media) : '[]' %>;
+// Safely output media data as JSON
+let allMedia = [];
+try {
+    allMedia = <%- typeof media !== 'undefined' ? JSON.stringify(media) : '[]' %>;
+} catch (e) {
+    console.error('Error parsing media data:', e);
+    allMedia = [];
+}
 
 // Wait for DOM and Bootstrap to be ready
 document.addEventListener('DOMContentLoaded', function() {
-    // Theme selection
-    const themeOptions = document.querySelectorAll('.theme-option');
-    if (themeOptions.length > 0) {
-        themeOptions.forEach(option => {
-            option.addEventListener('click', function(e) {
+    console.log('Settings page loaded');
+    
+    // Theme selection - use event delegation for better reliability
+    const themeSelector = document.getElementById('themeSelector');
+    if (themeSelector) {
+        themeSelector.addEventListener('click', function(e) {
+            const themeOption = e.target.closest('.theme-option');
+            if (themeOption) {
                 e.preventDefault();
+                e.stopPropagation();
+                
                 // Remove active class from all
                 document.querySelectorAll('.theme-option').forEach(opt => {
                     opt.classList.remove('border-primary', 'border-3');
                 });
                 // Add active class to selected
-                this.classList.add('border-primary', 'border-3');
+                themeOption.classList.add('border-primary', 'border-3');
                 
-                const theme = this.getAttribute('data-theme');
+                const theme = themeOption.getAttribute('data-theme');
                 const selectedThemeInput = document.getElementById('selectedTheme');
                 if (selectedThemeInput) {
                     selectedThemeInput.value = theme;
+                    console.log('Theme selected:', theme);
                 }
                 
                 // Show/hide custom colors section
@@ -498,7 +511,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         customSection.style.display = 'none';
                     }
                 }
-            });
+            }
         });
     }
 
@@ -574,6 +587,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Hero image picker - make global so onclick handlers can access
 function selectHeroImage(imageId) {
+    console.log('selectHeroImage called with:', imageId);
+    if (!imageId) {
+        console.error('No image ID provided');
+        return;
+    }
+    
     const heroImageInput = document.getElementById('heroBackgroundImage');
     if (heroImageInput) {
         heroImageInput.value = imageId;
@@ -589,10 +608,24 @@ function selectHeroImage(imageId) {
     
     // Close modal
     const modalElement = document.getElementById('heroImageModal');
-    if (modalElement && typeof bootstrap !== 'undefined') {
-        const modal = bootstrap.Modal.getInstance(modalElement);
-        if (modal) {
-            modal.hide();
+    if (modalElement) {
+        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            const modal = bootstrap.Modal.getInstance(modalElement);
+            if (modal) {
+                modal.hide();
+            } else {
+                // Fallback: just hide the modal manually
+                modalElement.classList.remove('show');
+                document.body.classList.remove('modal-open');
+                const backdrop = document.querySelector('.modal-backdrop');
+                if (backdrop) backdrop.remove();
+            }
+        } else {
+            // Fallback if Bootstrap not loaded
+            modalElement.classList.remove('show');
+            document.body.classList.remove('modal-open');
+            const backdrop = document.querySelector('.modal-backdrop');
+            if (backdrop) backdrop.remove();
         }
     }
 }
@@ -614,6 +647,12 @@ function clearHeroImage() {
 
 // Logo image picker - make global so onclick handlers can access
 function selectLogoImage(imageId) {
+    console.log('selectLogoImage called with:', imageId);
+    if (!imageId) {
+        console.error('No image ID provided');
+        return;
+    }
+    
     const logoInput = document.getElementById('logo');
     if (logoInput) {
         logoInput.value = imageId;
@@ -629,10 +668,24 @@ function selectLogoImage(imageId) {
     
     // Close modal
     const modalElement = document.getElementById('logoModal');
-    if (modalElement && typeof bootstrap !== 'undefined') {
-        const modal = bootstrap.Modal.getInstance(modalElement);
-        if (modal) {
-            modal.hide();
+    if (modalElement) {
+        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            const modal = bootstrap.Modal.getInstance(modalElement);
+            if (modal) {
+                modal.hide();
+            } else {
+                // Fallback: just hide the modal manually
+                modalElement.classList.remove('show');
+                document.body.classList.remove('modal-open');
+                const backdrop = document.querySelector('.modal-backdrop');
+                if (backdrop) backdrop.remove();
+            }
+        } else {
+            // Fallback if Bootstrap not loaded
+            modalElement.classList.remove('show');
+            document.body.classList.remove('modal-open');
+            const backdrop = document.querySelector('.modal-backdrop');
+            if (backdrop) backdrop.remove();
         }
     }
 }
@@ -686,37 +739,41 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Add click event listeners to media items as backup (in addition to onclick)
+    // Add click event listeners to media items using event delegation
     // This ensures clicks work even if inline handlers fail
-    setTimeout(function() {
-        // Logo modal media items
-        const logoModal = document.getElementById('logoModal');
-        if (logoModal) {
-            logoModal.addEventListener('click', function(e) {
-                const mediaItem = e.target.closest('.media-item');
-                if (mediaItem) {
-                    const imageId = mediaItem.getAttribute('data-id');
-                    if (imageId) {
-                        selectLogoImage(imageId);
-                    }
+    // Logo modal media items
+    const logoModal = document.getElementById('logoModal');
+    if (logoModal) {
+        logoModal.addEventListener('click', function(e) {
+            const mediaItem = e.target.closest('.media-item');
+            if (mediaItem) {
+                e.preventDefault();
+                e.stopPropagation();
+                const imageId = mediaItem.getAttribute('data-id');
+                if (imageId) {
+                    console.log('Logo image selected:', imageId);
+                    selectLogoImage(imageId);
                 }
-            });
-        }
+            }
+        });
+    }
 
-        // Hero modal media items
-        const heroModal = document.getElementById('heroImageModal');
-        if (heroModal) {
-            heroModal.addEventListener('click', function(e) {
-                const mediaItem = e.target.closest('.media-item');
-                if (mediaItem) {
-                    const imageId = mediaItem.getAttribute('data-id');
-                    if (imageId) {
-                        selectHeroImage(imageId);
-                    }
+    // Hero modal media items
+    const heroModal = document.getElementById('heroImageModal');
+    if (heroModal) {
+        heroModal.addEventListener('click', function(e) {
+            const mediaItem = e.target.closest('.media-item');
+            if (mediaItem) {
+                e.preventDefault();
+                e.stopPropagation();
+                const imageId = mediaItem.getAttribute('data-id');
+                if (imageId) {
+                    console.log('Hero image selected:', imageId);
+                    selectHeroImage(imageId);
                 }
-            });
-        }
-    }, 100);
+            }
+        });
+    }
 });
 
 function renderLogoMediaGrid(mediaItems) {

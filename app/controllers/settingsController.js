@@ -4,7 +4,11 @@ exports.index = async (req, res) => {
   try {
     const settings = await Settings.getSettings();
     const Media = require('../models/Media');
-    const media = await Media.find().sort({ createdAt: -1 }).limit(50);
+    const media = await Media.find()
+      .select('-sizes.thumbnail.data -sizes.medium.data -sizes.large.data')
+      .sort({ createdAt: -1 })
+      .limit(50)
+      .lean(); // Convert to plain objects for JSON serialization
     
     // Populate background image and logo if they exist
     if (settings.hero && settings.hero.backgroundImage) {
