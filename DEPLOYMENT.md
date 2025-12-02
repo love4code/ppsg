@@ -117,6 +117,26 @@ heroku config:set PORT="3000"
 - Check that 2FA is enabled on Gmail account
 - Test email settings locally first
 
+### Admin Login Not Working (Custom Domain)
+
+- **CRITICAL:** Make sure `SESSION_SECRET` is set in Heroku config vars
+  ```bash
+  heroku config:set SESSION_SECRET="your-random-secret-key-here"
+  ```
+- Generate a strong random secret: `openssl rand -base64 32`
+- After setting SESSION_SECRET, restart the app: `heroku restart`
+- Clear your browser cookies and try logging in again
+- Verify the custom domain is properly configured in Heroku dashboard
+
+### Images Not Displaying
+
+- Images are now served via public routes (no authentication required)
+- If images still don't display:
+  - Check that media files exist in the database
+  - Verify the image route is accessible: `/admin/media/image/:id/:size`
+  - Check browser console for 404 errors
+  - Ensure MongoDB connection is working properly
+
 ## Useful Commands
 
 ```bash

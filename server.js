@@ -44,8 +44,10 @@ app.use(session({
   cookie: {
     maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
     httpOnly: true,
+    // In production (Heroku), use secure cookies and sameSite 'lax' for custom domains
+    // 'none' is only needed for cross-site cookies, which we don't need here
     secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    sameSite: process.env.NODE_ENV === 'production' ? 'lax' : 'lax',
   },
 }));
 

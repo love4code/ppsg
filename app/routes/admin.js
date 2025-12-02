@@ -36,7 +36,7 @@ router.put('/media/:id', mediaController.update);
 router.post('/media/upload', upload.array('files', 10), mediaController.upload);
 router.post('/media/upload-single', upload.single('files'), mediaController.upload);
 router.delete('/media/:id', mediaController.delete);
-router.get('/media/image/:id/:size', mediaController.getImage);
+// Note: Image route moved to public routes so images can be accessed without authentication
 router.get('/api/media', mediaController.getAll);
 
 // Project routes

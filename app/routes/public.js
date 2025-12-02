@@ -6,6 +6,7 @@ const projectController = require('../controllers/projectController');
 const productController = require('../controllers/productController');
 const serviceController = require('../controllers/serviceController');
 const contactController = require('../controllers/contactController');
+const mediaController = require('../controllers/mediaController');
 
 // Home
 router.get('/', homeController.index);
@@ -32,6 +33,9 @@ router.post('/contact', contactController.submit);
 router.get('/about', (req, res) => {
   res.render('public/about');
 });
+
+// Public image route (must be accessible without authentication)
+router.get('/admin/media/image/:id/:size', mediaController.getImage);
 
 module.exports = router;
 
