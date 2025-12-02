@@ -33,6 +33,23 @@ app.use(express.static(path.join(__dirname, 'app/public')));
 // Trust proxy (required for Heroku)
 app.set('trust proxy', 1);
 
+// Domain and HTTPS redirect middleware (for production)
+app.use((req, res, next) => {
+  const host = req.headers.host;
+  const shouldBe = 'www.premierpoolsupplygroup.com';
+
+  if (host !== shouldBe) {
+    return res.redirect(301, `https://${shouldBe}${req.url}`);
+  }
+
+  // optionally also force https if you're terminating SSL at Heroku:
+  if (req.headers['x-forwarded-proto'] !== 'https') {
+    return res.redirect(301, `https://${host}${req.url}`);
+  }
+
+  next();
+});
+
 // Session configuration
 app.use(session({
   secret: process.env.SESSION_SECRET || 'your-secret-key-change-in-production',
