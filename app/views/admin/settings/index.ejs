@@ -406,7 +406,7 @@
                         <% media.forEach(item => { %>
                             <div class="col-md-3">
                                 <div class="card media-item" data-id="<%= item._id %>" onclick="selectLogoImage('<%= item._id %>')" style="cursor: pointer;">
-                                    <img src="/admin/media/image/<%= item._id %>/small" class="card-img-top" alt="<%= item.originalFilename %>" style="height: 150px; object-fit: cover;">
+                                    <img src="/admin/media/image/<%= item._id %>/thumbnail" class="card-img-top" alt="<%= item.originalFilename %>" style="height: 150px; object-fit: cover;" onerror="this.src='/admin/media/image/<%= item._id %>/medium'">
                                     <div class="card-body p-2">
                                         <small class="text-muted d-block text-truncate"><%= item.title || item.originalFilename %></small>
                                     </div>
@@ -444,7 +444,7 @@
                         <% media.forEach(item => { %>
                             <div class="col-md-3">
                                 <div class="card media-item" data-id="<%= item._id %>" onclick="selectHeroImage('<%= item._id %>')">
-                                    <img src="/admin/media/image/<%= item._id %>/small" class="card-img-top" alt="<%= item.originalFilename %>" style="height: 150px; object-fit: cover;">
+                                    <img src="/admin/media/image/<%= item._id %>/thumbnail" class="card-img-top" alt="<%= item.originalFilename %>" style="height: 150px; object-fit: cover;" onerror="this.src='/admin/media/image/<%= item._id %>/medium'">
                                     <div class="card-body p-2">
                                         <small class="text-muted d-block text-truncate"><%= item.title || item.originalFilename %></small>
                                     </div>
@@ -467,121 +467,257 @@
 
 <script>
 const allMedia = <%= typeof media !== 'undefined' ? JSON.stringify(media) : '[]' %>;
-// Theme selection
-document.querySelectorAll('.theme-option').forEach(option => {
-    option.addEventListener('click', function() {
-        // Remove active class from all
-        document.querySelectorAll('.theme-option').forEach(opt => {
-            opt.classList.remove('border-primary', 'border-3');
+
+// Wait for DOM and Bootstrap to be ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Theme selection
+    const themeOptions = document.querySelectorAll('.theme-option');
+    if (themeOptions.length > 0) {
+        themeOptions.forEach(option => {
+            option.addEventListener('click', function(e) {
+                e.preventDefault();
+                // Remove active class from all
+                document.querySelectorAll('.theme-option').forEach(opt => {
+                    opt.classList.remove('border-primary', 'border-3');
+                });
+                // Add active class to selected
+                this.classList.add('border-primary', 'border-3');
+                
+                const theme = this.getAttribute('data-theme');
+                const selectedThemeInput = document.getElementById('selectedTheme');
+                if (selectedThemeInput) {
+                    selectedThemeInput.value = theme;
+                }
+                
+                // Show/hide custom colors section
+                const customSection = document.getElementById('customColorsSection');
+                if (customSection) {
+                    if (theme === 'custom') {
+                        customSection.style.display = 'block';
+                    } else {
+                        customSection.style.display = 'none';
+                    }
+                }
+            });
         });
-        // Add active class to selected
-        this.classList.add('border-primary', 'border-3');
-        
-        const theme = this.getAttribute('data-theme');
-        document.getElementById('selectedTheme').value = theme;
-        
-        // Show/hide custom colors section
-        const customSection = document.getElementById('customColorsSection');
-        if (theme === 'custom') {
-            customSection.style.display = 'block';
-        } else {
-            customSection.style.display = 'none';
+    }
+
+    // Color picker updates
+    const colorInputs = ['customPrimary', 'customSecondary', 'customSuccess', 'customDanger', 'customWarning', 'customInfo'];
+    colorInputs.forEach(inputId => {
+        const input = document.getElementById(inputId);
+        if (input) {
+            input.addEventListener('input', function() {
+                // Update text input
+                const textInput = this.parentElement.querySelector('input[type="text"]');
+                if (textInput) {
+                    textInput.value = this.value;
+                }
+                
+                // Update preview badge
+                const previewId = 'preview' + inputId.replace('custom', '');
+                const preview = document.getElementById(previewId);
+                if (preview) {
+                    preview.style.backgroundColor = this.value;
+                }
+            });
         }
     });
-});
 
-// Color picker updates
-const colorInputs = ['customPrimary', 'customSecondary', 'customSuccess', 'customDanger', 'customWarning', 'customInfo'];
-colorInputs.forEach(inputId => {
-    const input = document.getElementById(inputId);
-    if (input) {
-        input.addEventListener('input', function() {
-            // Update text input
-            const textInput = this.parentElement.querySelector('input[type="text"]');
-            textInput.value = this.value;
-            
-            // Update preview badge
-            const previewId = 'preview' + inputId.replace('custom', '');
-            const preview = document.getElementById(previewId);
-            if (preview) {
-                preview.style.backgroundColor = this.value;
+    // Hero section toggle
+    const heroEnabled = document.getElementById('heroEnabled');
+    if (heroEnabled) {
+        heroEnabled.addEventListener('change', function() {
+            const heroSettings = document.getElementById('heroSettings');
+            if (heroSettings) {
+                heroSettings.style.display = this.checked ? 'block' : 'none';
             }
+        });
+    }
+
+    // Overlay opacity slider
+    const overlaySlider = document.getElementById('heroOverlayOpacity');
+    if (overlaySlider) {
+        overlaySlider.addEventListener('input', function() {
+            const opacityValue = document.getElementById('overlayOpacityValue');
+            if (opacityValue) {
+                opacityValue.textContent = Math.round(this.value * 100) + '%';
+            }
+        });
+    }
+
+    // Text color picker update
+    const heroTextColorInput = document.getElementById('heroTextColor');
+    if (heroTextColorInput) {
+        heroTextColorInput.addEventListener('input', function() {
+            const textInput = this.parentElement.querySelector('input[type="text"]');
+            if (textInput) {
+                textInput.value = this.value;
+            }
+        });
+    }
+
+    // Form submission
+    const settingsForm = document.getElementById('settingsForm');
+    if (settingsForm) {
+        settingsForm.addEventListener('submit', function(e) {
+            // Reload theme CSS after save
+            setTimeout(() => {
+                const themeLink = document.querySelector('link[href="/admin/api/theme.css"]');
+                if (themeLink) {
+                    themeLink.href = '/admin/api/theme.css?v=' + new Date().getTime();
+                }
+            }, 500);
         });
     }
 });
 
-// Hero section toggle
-document.getElementById('heroEnabled').addEventListener('change', function() {
-    const heroSettings = document.getElementById('heroSettings');
-    heroSettings.style.display = this.checked ? 'block' : 'none';
-});
-
-// Overlay opacity slider
-const overlaySlider = document.getElementById('heroOverlayOpacity');
-if (overlaySlider) {
-    overlaySlider.addEventListener('input', function() {
-        document.getElementById('overlayOpacityValue').textContent = Math.round(this.value * 100) + '%';
-    });
-}
-
-// Hero image picker
+// Hero image picker - make global so onclick handlers can access
 function selectHeroImage(imageId) {
-    document.getElementById('heroBackgroundImage').value = imageId;
+    const heroImageInput = document.getElementById('heroBackgroundImage');
+    if (heroImageInput) {
+        heroImageInput.value = imageId;
+    }
     const preview = document.getElementById('heroImagePreview');
-    preview.innerHTML = `<img src="/admin/media/image/${imageId}/medium" class="img-thumbnail" style="max-width: 300px; max-height: 200px; object-fit: cover;">`;
-    document.getElementById('clearHeroImage').style.display = 'block';
+    if (preview) {
+        preview.innerHTML = `<img src="/admin/media/image/${imageId}/medium" class="img-thumbnail" style="max-width: 300px; max-height: 200px; object-fit: cover;">`;
+    }
+    const clearBtn = document.getElementById('clearHeroImage');
+    if (clearBtn) {
+        clearBtn.style.display = 'block';
+    }
     
     // Close modal
-    const modal = bootstrap.Modal.getInstance(document.getElementById('heroImageModal'));
-    if (modal) {
-        modal.hide();
+    const modalElement = document.getElementById('heroImageModal');
+    if (modalElement && typeof bootstrap !== 'undefined') {
+        const modal = bootstrap.Modal.getInstance(modalElement);
+        if (modal) {
+            modal.hide();
+        }
     }
 }
 
 function clearHeroImage() {
-    document.getElementById('heroBackgroundImage').value = '';
-    document.getElementById('heroImagePreview').innerHTML = '';
-    document.getElementById('clearHeroImage').style.display = 'none';
+    const heroImageInput = document.getElementById('heroBackgroundImage');
+    if (heroImageInput) {
+        heroImageInput.value = '';
+    }
+    const preview = document.getElementById('heroImagePreview');
+    if (preview) {
+        preview.innerHTML = '';
+    }
+    const clearBtn = document.getElementById('clearHeroImage');
+    if (clearBtn) {
+        clearBtn.style.display = 'none';
+    }
 }
 
-// Logo image picker
+// Logo image picker - make global so onclick handlers can access
 function selectLogoImage(imageId) {
-    document.getElementById('logo').value = imageId;
+    const logoInput = document.getElementById('logo');
+    if (logoInput) {
+        logoInput.value = imageId;
+    }
     const preview = document.getElementById('logoPreview');
-    preview.innerHTML = `<img src="/admin/media/image/${imageId}/medium" class="img-thumbnail" style="max-height: 100px; max-width: 200px; object-fit: contain;">`;
-    document.getElementById('clearLogo').style.display = 'block';
+    if (preview) {
+        preview.innerHTML = `<img src="/admin/media/image/${imageId}/medium" class="img-thumbnail" style="max-height: 100px; max-width: 200px; object-fit: contain;">`;
+    }
+    const clearBtn = document.getElementById('clearLogo');
+    if (clearBtn) {
+        clearBtn.style.display = 'block';
+    }
     
     // Close modal
-    const modal = bootstrap.Modal.getInstance(document.getElementById('logoModal'));
-    if (modal) {
-        modal.hide();
+    const modalElement = document.getElementById('logoModal');
+    if (modalElement && typeof bootstrap !== 'undefined') {
+        const modal = bootstrap.Modal.getInstance(modalElement);
+        if (modal) {
+            modal.hide();
+        }
     }
 }
 
 function clearLogo() {
-    document.getElementById('logo').value = '';
+    const logoInput = document.getElementById('logo');
+    if (logoInput) {
+        logoInput.value = '';
+    }
     const preview = document.getElementById('logoPreview');
-    preview.innerHTML = `
-        <div class="text-muted">
-            <i class="bi bi-droplet-fill" style="font-size: 2rem;"></i>
-            <p class="small mb-0">Water icon will be displayed</p>
-        </div>
-    `;
-    document.getElementById('clearLogo').style.display = 'none';
+    if (preview) {
+        preview.innerHTML = `
+            <div class="text-muted">
+                <i class="bi bi-droplet-fill" style="font-size: 2rem;"></i>
+                <p class="small mb-0">Water icon will be displayed</p>
+            </div>
+        `;
+    }
+    const clearBtn = document.getElementById('clearLogo');
+    if (clearBtn) {
+        clearBtn.style.display = 'none';
+    }
 }
 
 // Logo media search
-if (document.getElementById('logoMediaSearch')) {
-    document.getElementById('logoMediaSearch').addEventListener('input', function(e) {
-        const searchTerm = e.target.value.toLowerCase();
-        const filtered = allMedia.filter(item => 
-            item.originalFilename.toLowerCase().includes(searchTerm) ||
-            (item.title && item.title.toLowerCase().includes(searchTerm)) ||
-            (item.altText && item.altText.toLowerCase().includes(searchTerm))
-        );
-        renderLogoMediaGrid(filtered);
-    });
-}
+document.addEventListener('DOMContentLoaded', function() {
+    const logoMediaSearch = document.getElementById('logoMediaSearch');
+    if (logoMediaSearch) {
+        logoMediaSearch.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const filtered = allMedia.filter(item => 
+                (item.originalFilename && item.originalFilename.toLowerCase().includes(searchTerm)) ||
+                (item.title && item.title.toLowerCase().includes(searchTerm)) ||
+                (item.altText && item.altText.toLowerCase().includes(searchTerm))
+            );
+            renderLogoMediaGrid(filtered);
+        });
+    }
+
+    // Hero media search
+    const heroMediaSearch = document.getElementById('heroMediaSearch');
+    if (heroMediaSearch) {
+        heroMediaSearch.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const filtered = allMedia.filter(item => 
+                (item.originalFilename && item.originalFilename.toLowerCase().includes(searchTerm)) ||
+                (item.title && item.title.toLowerCase().includes(searchTerm)) ||
+                (item.altText && item.altText.toLowerCase().includes(searchTerm))
+            );
+            renderHeroMediaGrid(filtered);
+        });
+    }
+
+    // Add click event listeners to media items as backup (in addition to onclick)
+    // This ensures clicks work even if inline handlers fail
+    setTimeout(function() {
+        // Logo modal media items
+        const logoModal = document.getElementById('logoModal');
+        if (logoModal) {
+            logoModal.addEventListener('click', function(e) {
+                const mediaItem = e.target.closest('.media-item');
+                if (mediaItem) {
+                    const imageId = mediaItem.getAttribute('data-id');
+                    if (imageId) {
+                        selectLogoImage(imageId);
+                    }
+                }
+            });
+        }
+
+        // Hero modal media items
+        const heroModal = document.getElementById('heroImageModal');
+        if (heroModal) {
+            heroModal.addEventListener('click', function(e) {
+                const mediaItem = e.target.closest('.media-item');
+                if (mediaItem) {
+                    const imageId = mediaItem.getAttribute('data-id');
+                    if (imageId) {
+                        selectHeroImage(imageId);
+                    }
+                }
+            });
+        }
+    }, 100);
+});
 
 function renderLogoMediaGrid(mediaItems) {
     const grid = document.getElementById('logoMediaGrid');
@@ -595,26 +731,13 @@ function renderLogoMediaGrid(mediaItems) {
     grid.innerHTML = mediaItems.map(item => `
         <div class="col-md-3">
             <div class="card media-item" data-id="${item._id}" onclick="selectLogoImage('${item._id}')" style="cursor: pointer;">
-                <img src="/admin/media/image/${item._id}/small" class="card-img-top" alt="${item.originalFilename}" style="height: 150px; object-fit: cover;">
+                <img src="/admin/media/image/${item._id}/thumbnail" class="card-img-top" alt="${item.originalFilename || 'Image'}" style="height: 150px; object-fit: cover;" onerror="this.src='/admin/media/image/${item._id}/medium'">
                 <div class="card-body p-2">
-                    <small class="text-muted d-block text-truncate">${item.title || item.originalFilename}</small>
+                    <small class="text-muted d-block text-truncate">${item.title || item.originalFilename || 'Untitled'}</small>
                 </div>
             </div>
         </div>
     `).join('');
-}
-
-// Hero media search
-if (document.getElementById('heroMediaSearch')) {
-    document.getElementById('heroMediaSearch').addEventListener('input', function(e) {
-        const searchTerm = e.target.value.toLowerCase();
-        const filtered = allMedia.filter(item => 
-            item.originalFilename.toLowerCase().includes(searchTerm) ||
-            (item.title && item.title.toLowerCase().includes(searchTerm)) ||
-            (item.altText && item.altText.toLowerCase().includes(searchTerm))
-        );
-        renderHeroMediaGrid(filtered);
-    });
 }
 
 function renderHeroMediaGrid(mediaItems) {
@@ -629,36 +752,14 @@ function renderHeroMediaGrid(mediaItems) {
     grid.innerHTML = mediaItems.map(item => `
         <div class="col-md-3">
             <div class="card media-item" data-id="${item._id}" onclick="selectHeroImage('${item._id}')" style="cursor: pointer;">
-                <img src="/admin/media/image/${item._id}/small" class="card-img-top" alt="${item.originalFilename}" style="height: 150px; object-fit: cover;">
+                <img src="/admin/media/image/${item._id}/thumbnail" class="card-img-top" alt="${item.originalFilename || 'Image'}" style="height: 150px; object-fit: cover;" onerror="this.src='/admin/media/image/${item._id}/medium'">
                 <div class="card-body p-2">
-                    <small class="text-muted d-block text-truncate">${item.title || item.originalFilename}</small>
+                    <small class="text-muted d-block text-truncate">${item.title || item.originalFilename || 'Untitled'}</small>
                 </div>
             </div>
         </div>
     `).join('');
 }
-
-// Text color picker update
-const heroTextColorInput = document.getElementById('heroTextColor');
-if (heroTextColorInput) {
-    heroTextColorInput.addEventListener('input', function() {
-        const textInput = this.parentElement.querySelector('input[type="text"]');
-        if (textInput) {
-            textInput.value = this.value;
-        }
-    });
-}
-
-// Form submission
-document.getElementById('settingsForm').addEventListener('submit', function(e) {
-    // Reload theme CSS after save
-    setTimeout(() => {
-        const themeLink = document.querySelector('link[href="/admin/api/theme.css"]');
-        if (themeLink) {
-            themeLink.href = '/admin/api/theme.css?v=' + new Date().getTime();
-        }
-    }, 500);
-});
 </script>
 
 <style>
@@ -678,6 +779,25 @@ document.getElementById('settingsForm').addEventListener('submit', function(e) {
 
 .theme-option:hover .theme-preview {
     transform: scale(1.05);
+}
+
+.media-item {
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    user-select: none;
+}
+
+.media-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.media-item img {
+    pointer-events: none;
+}
+
+.media-item * {
+    pointer-events: none;
 }
 </style>
 
