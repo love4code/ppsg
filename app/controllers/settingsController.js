@@ -10,12 +10,15 @@ exports.index = async (req, res) => {
       .limit(50)
       .lean(); // Convert to plain objects for JSON serialization
     
-    // Populate background image and logo if they exist
+    // Populate background image, logo, and ogImage if they exist
     if (settings.hero && settings.hero.backgroundImage) {
       await settings.populate('hero.backgroundImage');
     }
     if (settings.logo) {
       await settings.populate('logo');
+    }
+    if (settings.ogImage) {
+      await settings.populate('ogImage');
     }
     
     res.render('admin/settings/index', { 
@@ -96,6 +99,14 @@ exports.update = async (req, res) => {
     } else if (req.body.logo === '') {
       // Empty string means remove logo
       settings.logo = undefined;
+    }
+    
+    // Handle ogImage
+    if (req.body.ogImage) {
+      settings.ogImage = req.body.ogImage || undefined;
+    } else if (req.body.ogImage === '') {
+      // Empty string means remove ogImage
+      settings.ogImage = undefined;
     }
     
     await settings.save();

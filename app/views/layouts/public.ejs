@@ -10,7 +10,15 @@
     const pageTitle = seoTitle ? `${seoTitle} - PPSG` : 'PPSG';
     const metaDescription = typeof seoData !== 'undefined' && seoData.description ? seoData.description : '';
     const metaKeywords = typeof seoData !== 'undefined' && seoData.keywords ? seoData.keywords : '';
-    const ogImage = typeof seoData !== 'undefined' && seoData.ogImage ? seoData.ogImage : null;
+    let ogImage = typeof seoData !== 'undefined' && seoData.ogImage ? seoData.ogImage : null;
+    // Use default ogImage from settings if no page-specific one is provided
+    if (!ogImage && typeof siteOgImage !== 'undefined' && siteOgImage && siteOgImage._id) {
+        const protocol = typeof req !== 'undefined' && req.protocol ? req.protocol : 'https';
+        const host = typeof req !== 'undefined' && req.get ? req.get('host') : '';
+        if (host) {
+            ogImage = `${protocol}://${host}/admin/media/image/${siteOgImage._id}/large`;
+        }
+    }
     const ogUrl = typeof seoData !== 'undefined' && seoData.url ? seoData.url : '';
     const siteName = typeof siteSettings !== 'undefined' && siteSettings.company && siteSettings.company.name ? siteSettings.company.name : 'PPSG';
     %>

@@ -138,6 +138,10 @@ const settingsSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Media',
   },
+  ogImage: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Media',
+  },
 }, {
   timestamps: true,
 });
