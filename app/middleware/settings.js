@@ -26,6 +26,7 @@ const loadSettings = async (req, res, next) => {
     res.locals.socialMedia = {};
     res.locals.siteSettings = {};
     res.locals.siteLogo = null;
+    res.locals.siteOgImage = null;
     next();
   }
 };

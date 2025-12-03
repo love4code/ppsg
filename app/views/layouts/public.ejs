@@ -25,8 +25,12 @@
     }
     
     // Use default ogImage from settings if no page-specific one is provided
-    if (!ogImage && typeof siteOgImage !== 'undefined' && siteOgImage && siteOgImage._id) {
-        ogImage = getAbsoluteUrl(`/admin/media/image/${siteOgImage._id}/large`);
+    if (!ogImage && typeof siteOgImage !== 'undefined' && siteOgImage) {
+        // Handle both populated objects and ObjectId strings
+        const ogImageId = siteOgImage._id || siteOgImage;
+        if (ogImageId) {
+            ogImage = getAbsoluteUrl(`/admin/media/image/${ogImageId}/large`);
+        }
     }
     
     // Set ogUrl - use seoData.url if provided, otherwise construct from current request

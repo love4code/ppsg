@@ -233,16 +233,17 @@ exports.publicShow = async (req, res) => {
     }
 
     // Prepare SEO data
-    const ogImageObj = project.ogImage || project.mainImage;
-    const ogImageUrl = ogImageObj && ogImageObj._id 
-      ? `${req.protocol}://${req.get('host')}/admin/media/image/${ogImageObj._id}/large`
-      : null;
+    // Only use project's ogImage if explicitly set, otherwise let layout use default from settings
+    let ogImageUrl = null;
+    if (project.ogImage && project.ogImage._id) {
+      ogImageUrl = `${req.protocol}://${req.get('host')}/admin/media/image/${project.ogImage._id}/large`;
+    }
     
     const seoData = {
       title: project.metaTitle || project.title,
       description: project.metaDescription || project.description || '',
       keywords: project.keywords && project.keywords.length > 0 ? project.keywords.join(', ') : '',
-      ogImage: ogImageUrl,
+      ogImage: ogImageUrl, // null if not set, so layout will use default from settings
       url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
     };
 
