@@ -11,15 +11,29 @@
     const metaDescription = typeof seoData !== 'undefined' && seoData.description ? seoData.description : '';
     const metaKeywords = typeof seoData !== 'undefined' && seoData.keywords ? seoData.keywords : '';
     let ogImage = typeof seoData !== 'undefined' && seoData.ogImage ? seoData.ogImage : null;
+    
+    // Helper function to get absolute URL
+    function getAbsoluteUrl(path) {
+        if (typeof req === 'undefined') return '';
+        // Check for proxy headers (Heroku, etc.)
+        const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'https';
+        const host = req.get('host') || req.headers.host || '';
+        if (!host) return '';
+        // Use https if x-forwarded-proto indicates https, or if protocol is already https
+        const finalProtocol = (req.headers['x-forwarded-proto'] === 'https' || protocol === 'https') ? 'https' : 'http';
+        return `${finalProtocol}://${host}${path}`;
+    }
+    
     // Use default ogImage from settings if no page-specific one is provided
     if (!ogImage && typeof siteOgImage !== 'undefined' && siteOgImage && siteOgImage._id) {
-        const protocol = typeof req !== 'undefined' && req.protocol ? req.protocol : 'https';
-        const host = typeof req !== 'undefined' && req.get ? req.get('host') : '';
-        if (host) {
-            ogImage = `${protocol}://${host}/admin/media/image/${siteOgImage._id}/large`;
-        }
+        ogImage = getAbsoluteUrl(`/admin/media/image/${siteOgImage._id}/large`);
     }
-    const ogUrl = typeof seoData !== 'undefined' && seoData.url ? seoData.url : '';
+    
+    // Set ogUrl - use seoData.url if provided, otherwise construct from current request
+    let ogUrl = typeof seoData !== 'undefined' && seoData.url ? seoData.url : '';
+    if (!ogUrl && typeof req !== 'undefined') {
+        ogUrl = getAbsoluteUrl(req.originalUrl || '/');
+    }
     const siteName = typeof siteSettings !== 'undefined' && siteSettings.company && siteSettings.company.name ? siteSettings.company.name : 'PPSG';
     %>
     
@@ -42,6 +56,10 @@
     <% } %>
     <% if (ogImage) { %>
     <meta property="og:image" content="<%= ogImage %>">
+    <meta property="og:image:secure_url" content="<%= ogImage %>">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
     <% } %>
     <meta property="og:site_name" content="<%= siteName %>">
     
@@ -54,6 +72,7 @@
     <% } %>
     <% if (ogImage) { %>
     <meta name="twitter:image" content="<%= ogImage %>">
+    <meta name="twitter:image:alt" content="<%= seoTitle || pageTitle %>">
     <% } %>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
