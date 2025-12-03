@@ -367,13 +367,16 @@
                             <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#ogImageModal">
                                 <i class="bi bi-images"></i> Choose from Media Library
                             </button>
-                            <button type="button" class="btn btn-outline-danger" id="clearOgImage" style="display: <%= settings.ogImage ? 'block' : 'none' %>;" onclick="clearOgImage()">
+                            <button type="button" class="btn btn-outline-danger" id="clearOgImage" style="display: <%= (settings.ogImage && (settings.ogImage._id || settings.ogImage)) ? 'block' : 'none' %>;">
                                 <i class="bi bi-x"></i> Clear Image
                             </button>
                         </div>
                         <div id="ogImagePreview" class="mt-2">
-                            <% if (settings.ogImage && settings.ogImage._id) { %>
-                                <img src="/admin/media/image/<%= settings.ogImage._id %>/medium" class="img-thumbnail" style="max-width: 300px; max-height: 200px; object-fit: cover;">
+                            <% 
+                            const ogImageId = settings.ogImage ? (settings.ogImage._id || settings.ogImage) : null;
+                            %>
+                            <% if (ogImageId) { %>
+                                <img src="/admin/media/image/<%= ogImageId %>/medium" class="img-thumbnail" style="max-width: 300px; max-height: 200px; object-fit: cover;">
                             <% } else { %>
                                 <div class="text-muted">
                                     <i class="bi bi-image" style="font-size: 2rem;"></i>
@@ -510,7 +513,7 @@
                     <% if (typeof media !== 'undefined' && media.length > 0) { %>
                         <% media.forEach(item => { %>
                             <div class="col-md-3">
-                                <div class="card media-item" data-id="<%= item._id %>" onclick="selectOgImage('<%= item._id %>')" style="cursor: pointer;">
+                                <div class="card media-item" data-id="<%= item._id %>" style="cursor: pointer;">
                                     <img src="/admin/media/image/<%= item._id %>/thumbnail" class="card-img-top" alt="<%= item.originalFilename %>" style="height: 150px; object-fit: cover;" onerror="this.src='/admin/media/image/<%= item._id %>/medium'">
                                     <div class="card-body p-2">
                                         <small class="text-muted d-block text-truncate"><%= item.title || item.originalFilename %></small>
@@ -652,6 +655,27 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// Make functions globally accessible
+window.clearOgImage = function() {
+    const ogImageInput = document.getElementById('ogImage');
+    if (ogImageInput) {
+        ogImageInput.value = '';
+    }
+    const preview = document.getElementById('ogImagePreview');
+    if (preview) {
+        preview.innerHTML = `
+            <div class="text-muted">
+                <i class="bi bi-image" style="font-size: 2rem;"></i>
+                <p class="small mb-0">No default Open Graph image set</p>
+            </div>
+        `;
+    }
+    const clearBtn = document.getElementById('clearOgImage');
+    if (clearBtn) {
+        clearBtn.style.display = 'none';
+    }
+};
+
 // Hero image picker - make global so onclick handlers can access
 function selectHeroImage(imageId) {
     console.log('selectHeroImage called with:', imageId);
@@ -778,7 +802,7 @@ function clearLogo() {
 }
 
 // Open Graph image picker - make global so onclick handlers can access
-function selectOgImage(imageId) {
+window.selectOgImage = function(imageId) {
     console.log('selectOgImage called with:', imageId);
     if (!imageId) {
         console.error('No image ID provided');
@@ -820,27 +844,7 @@ function selectOgImage(imageId) {
             if (backdrop) backdrop.remove();
         }
     }
-}
-
-function clearOgImage() {
-    const ogImageInput = document.getElementById('ogImage');
-    if (ogImageInput) {
-        ogImageInput.value = '';
-    }
-    const preview = document.getElementById('ogImagePreview');
-    if (preview) {
-        preview.innerHTML = `
-            <div class="text-muted">
-                <i class="bi bi-image" style="font-size: 2rem;"></i>
-                <p class="small mb-0">No default Open Graph image set</p>
-            </div>
-        `;
-    }
-    const clearBtn = document.getElementById('clearOgImage');
-    if (clearBtn) {
-        clearBtn.style.display = 'none';
-    }
-}
+};
 
 // Logo media search
 document.addEventListener('DOMContentLoaded', function() {
@@ -932,8 +936,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 const imageId = mediaItem.getAttribute('data-id');
                 if (imageId) {
                     console.log('Open Graph image selected:', imageId);
-                    selectOgImage(imageId);
+                    if (typeof window.selectOgImage === 'function') {
+                        window.selectOgImage(imageId);
+                    }
                 }
+            }
+        });
+    }
+
+    // Clear Open Graph image button
+    const clearOgImageBtn = document.getElementById('clearOgImage');
+    if (clearOgImageBtn) {
+        clearOgImageBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (typeof window.clearOgImage === 'function') {
+                window.clearOgImage();
             }
         });
     }
