@@ -40,7 +40,7 @@ app.set('trust proxy', 1)
 if (process.env.NODE_ENV === 'production') {
   app.use((req, res, next) => {
     const host = req.headers.host
-    const shouldBe = 'www.newgenerationpool.com'
+    const shouldBe = 'www.premierpoolsupplygroup.com'
 
     if (host !== shouldBe) {
       return res.redirect(301, `https://${shouldBe}${req.url}`)
