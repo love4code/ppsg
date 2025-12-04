@@ -13,7 +13,13 @@ const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/ppsg-cms'
 mongoose
   .connect(mongoUri, {
     useNewUrlParser: true,
-    useUnifiedTopology: true
+    useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
+    socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
+    connectTimeoutMS: 10000, // Give up initial connection after 10s
+    maxPoolSize: 10, // Maintain up to 10 socket connections
+    retryWrites: true,
+    retryReads: true
   })
   .then(() => {
     console.log('✅ MongoDB connected successfully')
@@ -26,6 +32,41 @@ mongoose
     console.error('⚠️  Connection string:', mongoUri)
     // Don't exit - let the app start but it will fail on database operations
   })
+
+// Handle MongoDB connection events
+mongoose.connection.on('error', (err) => {
+  console.error('MongoDB connection error:', err)
+})
+
+mongoose.connection.on('disconnected', () => {
+  console.warn('MongoDB disconnected. Attempting to reconnect...')
+})
+
+mongoose.connection.on('reconnected', () => {
+  console.log('✅ MongoDB reconnected successfully')
+})
+
+// Handle topology errors by resetting connection
+mongoose.connection.on('topologyDescriptionChanged', (description) => {
+  if (description.type === 'ReplicaSetNoPrimary') {
+    console.warn('⚠️  MongoDB replica set has no primary. Resetting connection...')
+    // Reset the connection to clear stale topology cache
+    mongoose.connection.close().then(() => {
+      mongoose.connect(mongoUri, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+        serverSelectionTimeoutMS: 5000,
+        socketTimeoutMS: 45000,
+        connectTimeoutMS: 10000,
+        maxPoolSize: 10,
+        retryWrites: true,
+        retryReads: true
+      }).catch(err => {
+        console.error('Failed to reconnect:', err.message)
+      })
+    })
+  }
+})
 
 // Middleware
 app.use(express.urlencoded({ extended: true }))
