@@ -242,6 +242,16 @@ exports.delete = async (req, res) => {
   }
 };
 
+// Helper function to add timeout to promises
+const withTimeout = (promise, timeoutMs = 5000) => {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Operation timed out')), timeoutMs)
+    )
+  ])
+}
+
 // Public routes
 exports.publicIndex = async (req, res) => {
   try {
@@ -249,13 +259,22 @@ exports.publicIndex = async (req, res) => {
     const limit = 12;
     const skip = (page - 1) * limit;
 
-    const products = await Product.find({ status: 'published' })
-      .populate('mainImage')
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
+    // Add timeout to prevent hanging queries
+    const products = await withTimeout(
+      Product.find({ status: 'published' })
+        .populate('mainImage')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(), // Use lean() for better performance
+      5000
+    );
 
-    const total = await Product.countDocuments({ status: 'published' });
+    const total = await withTimeout(
+      Product.countDocuments({ status: 'published' }),
+      5000
+    );
+    
     const totalPages = Math.ceil(total / limit);
 
     res.render('public/products/index', {
@@ -264,15 +283,25 @@ exports.publicIndex = async (req, res) => {
       totalPages,
     });
   } catch (error) {
-    req.session.error = 'Error loading products';
-    res.redirect('/');
+    console.error('Error loading products:', error.message);
+    // If timeout or error, show empty state instead of redirecting
+    res.render('public/products/index', {
+      products: [],
+      currentPage: 1,
+      totalPages: 0,
+    });
   }
 };
 
 exports.publicShow = async (req, res) => {
   try {
-    const product = await Product.findOne({ slug: req.params.slug, status: 'published' })
-      .populate(['mainImage', 'gallery', 'ogImage']);
+    // Add timeout to prevent hanging queries
+    const product = await withTimeout(
+      Product.findOne({ slug: req.params.slug, status: 'published' })
+        .populate(['mainImage', 'gallery', 'ogImage'])
+        .lean(), // Use lean() for better performance
+      5000
+    );
     
     if (!product) {
       return res.status(404).render('errors/404');
@@ -281,6 +310,7 @@ exports.publicShow = async (req, res) => {
     // Don't pass seoData to prevent metadata from showing on product pages
     res.render('public/products/show', { product });
   } catch (error) {
+    console.error('Error loading product:', error.message);
     res.status(500).render('errors/500', { error });
   }
 };
