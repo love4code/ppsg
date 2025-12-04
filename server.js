@@ -34,7 +34,7 @@ mongoose
   })
 
 // Handle MongoDB connection events
-mongoose.connection.on('error', (err) => {
+mongoose.connection.on('error', err => {
   console.error('MongoDB connection error:', err)
 })
 
@@ -47,23 +47,27 @@ mongoose.connection.on('reconnected', () => {
 })
 
 // Handle topology errors by resetting connection
-mongoose.connection.on('topologyDescriptionChanged', (description) => {
+mongoose.connection.on('topologyDescriptionChanged', description => {
   if (description.type === 'ReplicaSetNoPrimary') {
-    console.warn('⚠️  MongoDB replica set has no primary. Resetting connection...')
+    console.warn(
+      '⚠️  MongoDB replica set has no primary. Resetting connection...'
+    )
     // Reset the connection to clear stale topology cache
     mongoose.connection.close().then(() => {
-      mongoose.connect(mongoUri, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-        serverSelectionTimeoutMS: 5000,
-        socketTimeoutMS: 45000,
-        connectTimeoutMS: 10000,
-        maxPoolSize: 10,
-        retryWrites: true,
-        retryReads: true
-      }).catch(err => {
-        console.error('Failed to reconnect:', err.message)
-      })
+      mongoose
+        .connect(mongoUri, {
+          useNewUrlParser: true,
+          useUnifiedTopology: true,
+          serverSelectionTimeoutMS: 5000,
+          socketTimeoutMS: 45000,
+          connectTimeoutMS: 10000,
+          maxPoolSize: 10,
+          retryWrites: true,
+          retryReads: true
+        })
+        .catch(err => {
+          console.error('Failed to reconnect:', err.message)
+        })
     })
   }
 })
@@ -82,14 +86,16 @@ if (process.env.NODE_ENV === 'production') {
   app.use((req, res, next) => {
     const host = req.headers.host
     const shouldBe = 'www.premierpoolsupplygroup.com'
+    const protocol = req.headers['x-forwarded-proto'] || 'https'
 
-    if (host !== shouldBe) {
-      return res.redirect(301, `https://${shouldBe}${req.url}`)
+    // Force HTTPS first
+    if (protocol !== 'https') {
+      return res.redirect(301, `https://${host}${req.url}`)
     }
 
-    // optionally also force https if you're terminating SSL at Heroku:
-    if (req.headers['x-forwarded-proto'] !== 'https') {
-      return res.redirect(301, `https://${host}${req.url}`)
+    // Redirect non-www to www (e.g., premierpoolsupplygroup.com -> www.premierpoolsupplygroup.com)
+    if (host !== shouldBe) {
+      return res.redirect(301, `https://${shouldBe}${req.url}`)
     }
 
     next()
