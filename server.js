@@ -82,35 +82,35 @@ app.use(express.static(path.join(__dirname, 'app/public')))
 app.set('trust proxy', 1)
 
 // Domain and HTTPS redirect middleware (only in production)
-if (process.env.NODE_ENV === 'production') {
-  app.use((req, res, next) => {
-    let host = req.headers.host || ''
-    const protocol = req.headers['x-forwarded-proto'] || 'https'
-    const shouldBe = 'www.premierpoolsupplygroup.com'
+// if (process.env.NODE_ENV === 'production') {
+//   app.use((req, res, next) => {
+//     let host = req.headers.host || ''
+//     const protocol = req.headers['x-forwarded-proto'] || 'https'
+//     const shouldBe = 'www.premierpoolsupplygroup.com'
 
-    // Remove port if present (e.g., "premierpoolsupplygroup.com:443" -> "premierpoolsupplygroup.com")
-    host = host.split(':')[0].toLowerCase()
+//     // Remove port if present (e.g., "premierpoolsupplygroup.com:443" -> "premierpoolsupplygroup.com")
+//     host = host.split(':')[0].toLowerCase()
 
-    // Force HTTPS first
-    if (protocol !== 'https') {
-      return res.redirect(301, `https://${host}${req.url}`)
-    }
+//     // Force HTTPS first
+//     if (protocol !== 'https') {
+//       return res.redirect(301, `https://${host}${req.url}`)
+//     }
 
-    // Redirect non-www to www (e.g., premierpoolsupplygroup.com -> www.premierpoolsupplygroup.com)
-    if (host === 'premierpoolsupplygroup.com') {
-      console.log(`Redirecting ${host} to ${shouldBe}`)
-      return res.redirect(301, `https://${shouldBe}${req.url}`)
-    }
+//     // Redirect non-www to www (e.g., premierpoolsupplygroup.com -> www.premierpoolsupplygroup.com)
+//     if (host === 'premierpoolsupplygroup.com') {
+//       console.log(`Redirecting ${host} to ${shouldBe}`)
+//       return res.redirect(301, `https://${shouldBe}${req.url}`)
+//     }
 
-    // Redirect any other host that's not the correct one
-    if (host !== shouldBe) {
-      console.log(`Redirecting ${host} to ${shouldBe}`)
-      return res.redirect(301, `https://${shouldBe}${req.url}`)
-    }
+//     // Redirect any other host that's not the correct one
+//     if (host !== shouldBe) {
+//       console.log(`Redirecting ${host} to ${shouldBe}`)
+//       return res.redirect(301, `https://${shouldBe}${req.url}`)
+//     }
 
-    next()
-  })
-}
+//     next()
+//   })
+// }
 
 // Session configuration
 app.use(
