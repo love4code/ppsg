@@ -1,63 +1,88 @@
 <footer class="bg-dark text-light py-4 mt-5">
-    <div class="container">
-        <div class="row">
-            <div class="col-md-4">
-                <h5><%= typeof companySettings !== 'undefined' && companySettings && companySettings.name ? companySettings.name : 'PPSG' %></h5>
-                <% if (typeof companySettings !== 'undefined' && companySettings) { %>
-                    <% if (companySettings.address) { %>
-                        <p class="mb-1"><%= companySettings.address %></p>
-                    <% } %>
-                    <% if (companySettings.city || companySettings.state || companySettings.zipCode) { %>
-                        <p class="mb-1">
-                            <%= companySettings.city ? companySettings.city : '' %><%= companySettings.city && companySettings.state ? ', ' : '' %>
-                            <%= companySettings.state ? companySettings.state : '' %>
-                            <%= companySettings.zipCode ? companySettings.zipCode : '' %>
-                        </p>
-                    <% } %>
-                    <% if (companySettings.phone) { %>
-                        <p class="mb-1"><i class="bi bi-telephone"></i> <span class="phone-number text-light"><%= companySettings.phone %></span></p>
-                    <% } %>
-                    <% if (companySettings.email) { %>
-                        <p class="mb-0"><i class="bi bi-envelope"></i> <a href="mailto:<%= companySettings.email %>" class="text-light"><%= companySettings.email %></a></p>
-                    <% } %>
-                <% } else { %>
-                    <p class="mb-0">Your trusted partner for quality services.</p>
-                <% } %>
-            </div>
-            <div class="col-md-8 text-md-end">
-                <% if (typeof socialMedia !== 'undefined' && socialMedia) { %>
-                    <div class="mb-3">
-                        <% const socialLinks = []; %>
-                        <% if (socialMedia.facebook) socialLinks.push({ url: socialMedia.facebook, icon: 'bi-facebook', name: 'Facebook' }); %>
-                        <% if (socialMedia.twitter) socialLinks.push({ url: socialMedia.twitter, icon: 'bi-twitter', name: 'Twitter' }); %>
-                        <% if (socialMedia.instagram) socialLinks.push({ url: socialMedia.instagram, icon: 'bi-instagram', name: 'Instagram' }); %>
-                        <% if (socialMedia.linkedin) socialLinks.push({ url: socialMedia.linkedin, icon: 'bi-linkedin', name: 'LinkedIn' }); %>
-                        <% if (socialMedia.youtube) socialLinks.push({ url: socialMedia.youtube, icon: 'bi-youtube', name: 'YouTube' }); %>
-                        <% if (socialMedia.tiktok) socialLinks.push({ url: socialMedia.tiktok, icon: 'bi-tiktok', name: 'TikTok' }); %>
-                        
-                        <% if (socialLinks.length > 0) { %>
-                            <div class="d-flex justify-content-md-end justify-content-start gap-3 mb-2">
-                                <% socialLinks.forEach(link => { %>
-                                    <a href="<%= link.url %>" target="_blank" rel="noopener noreferrer" class="text-light" title="<%= link.name %>" style="font-size: 1.5rem;">
-                                        <i class="bi <%= link.icon %>"></i>
-                                    </a>
-                                <% }); %>
-                            </div>
-                        <% } %>
-                    </div>
-                <% } %>
-                <p class="mb-0">
-                    <% if (typeof companySettings !== 'undefined' && companySettings && companySettings.copyright) { %>
-                        <%= companySettings.copyright %>
-                    <% } else { %>
-                        &copy; <%= new Date().getFullYear() %> <%= typeof companySettings !== 'undefined' && companySettings && companySettings.name ? companySettings.name : 'PPSG' %>. All rights reserved.
-                    <% } %>
-                </p>
-                <p class="mb-0 mt-2">
-                    <a href="/admin/login" class="text-light text-decoration-none">Admin Login</a>
-                </p>
-            </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-md-4">
+        <h5>
+          <%= typeof companySettings !== 'undefined' && companySettings &&
+          companySettings.name ? companySettings.name : 'T & M Pools' %>
+        </h5>
+        <% if (typeof companySettings !== 'undefined' && companySettings) { %>
+        <% if (companySettings.address) { %>
+        <p class="mb-1"><%= companySettings.address %></p>
+        <% } %> <% if (companySettings.city || companySettings.state ||
+        companySettings.zipCode) { %>
+        <p class="mb-1">
+          <%= companySettings.city ? companySettings.city : '' %><%=
+          companySettings.city && companySettings.state ? ', ' : '' %> <%=
+          companySettings.state ? companySettings.state : '' %> <%=
+          companySettings.zipCode ? companySettings.zipCode : '' %>
+        </p>
+        <% } %> <% if (companySettings.phone) { %>
+        <p class="mb-1">
+          <i class="bi bi-telephone"></i>
+          <span class="phone-number text-light"
+            ><%= companySettings.phone %></span
+          >
+        </p>
+        <% } %> <% if (companySettings.email) { %>
+        <p class="mb-0">
+          <i class="bi bi-envelope"></i>
+          <a href="mailto:<%= companySettings.email %>" class="text-light"
+            ><%= companySettings.email %></a
+          >
+        </p>
+        <% } %> <% } else { %>
+        <p class="mb-0">Your trusted partner for quality services.</p>
+        <% } %>
+      </div>
+      <div class="col-md-8 text-md-end">
+        <% if (typeof socialMedia !== 'undefined' && socialMedia) { %>
+        <div class="mb-3">
+          <% const socialLinks = []; %> <% if (socialMedia.facebook)
+          socialLinks.push({ url: socialMedia.facebook, icon: 'bi-facebook',
+          name: 'Facebook' }); %> <% if (socialMedia.twitter) socialLinks.push({
+          url: socialMedia.twitter, icon: 'bi-twitter', name: 'Twitter' }); %>
+          <% if (socialMedia.instagram) socialLinks.push({ url:
+          socialMedia.instagram, icon: 'bi-instagram', name: 'Instagram' }); %>
+          <% if (socialMedia.linkedin) socialLinks.push({ url:
+          socialMedia.linkedin, icon: 'bi-linkedin', name: 'LinkedIn' }); %> <%
+          if (socialMedia.youtube) socialLinks.push({ url: socialMedia.youtube,
+          icon: 'bi-youtube', name: 'YouTube' }); %> <% if (socialMedia.tiktok)
+          socialLinks.push({ url: socialMedia.tiktok, icon: 'bi-tiktok', name:
+          'TikTok' }); %> <% if (socialLinks.length > 0) { %>
+          <div
+            class="d-flex justify-content-md-end justify-content-start gap-3 mb-2"
+          >
+            <% socialLinks.forEach(link => { %>
+            <a
+              href="<%= link.url %>"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-light"
+              title="<%= link.name %>"
+              style="font-size: 1.5rem"
+            >
+              <i class="bi <%= link.icon %>"></i>
+            </a>
+            <% }); %>
+          </div>
+          <% } %>
         </div>
+        <% } %>
+        <p class="mb-0">
+          <% if (typeof companySettings !== 'undefined' && companySettings &&
+          companySettings.copyright) { %> <%= companySettings.copyright %> <% }
+          else { %> &copy; <%= new Date().getFullYear() %> <%= typeof
+          companySettings !== 'undefined' && companySettings &&
+          companySettings.name ? companySettings.name : 'T & M Pools' %>. All
+          rights reserved. <% } %>
+        </p>
+        <p class="mb-0 mt-2">
+          <a href="/admin/login" class="text-light text-decoration-none"
+            >Admin Login</a
+          >
+        </p>
+      </div>
     </div>
+  </div>
 </footer>
-

@@ -52,6 +52,7 @@ heroku config:set EMAIL_PORT="587"
 heroku config:set EMAIL_USER="your-email@gmail.com"
 heroku config:set EMAIL_PASS="your-app-password"
 heroku config:set EMAIL_TO="aquarianpoolandspa@gmail.com"
+heroku config:set EMAIL_CC="tandmpool@gmail.com"
 
 # Port (Heroku sets this automatically, but you can set it)
 heroku config:set PORT="3000"

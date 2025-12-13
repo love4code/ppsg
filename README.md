@@ -1,4 +1,4 @@
-# PPSG CMS - Full-Stack Content Management System
+# T & M Pools CMS - Full-Stack Content Management System
 
 A polished full-stack CMS built with Node.js, Express, MongoDB, and EJS templates.
 
@@ -15,7 +15,7 @@ A polished full-stack CMS built with Node.js, Express, MongoDB, and EJS template
 1. Clone the repository and navigate to the project directory:
 
 ```bash
-cd PPSG
+cd T-M-Pools
 ```
 
 2. Install dependencies:
@@ -35,7 +35,8 @@ Edit `.env` and fill in your configuration:
 - `MONGODB_URI`: Your MongoDB connection string
 - `PORT`: Server port (default: 3000)
 - `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_USER`, `EMAIL_PASS`: Email service configuration
-- `EMAIL_TO`: Recipient email for contact form submissions
+- `EMAIL_TO`: Recipient email for contact form submissions (default: aquarianpoolandspa@gmail.com)
+- `EMAIL_CC`: CC email for contact form submissions (default: tandmpool@gmail.com)
 - `SESSION_SECRET`: A random secret string for session encryption
 
 4. Seed the database with sample data (optional):
@@ -117,7 +118,7 @@ All images are stored in MongoDB using GridFS for efficient storage and retrieva
 ## Project Structure
 
 ```
-PPSG/
+T & M Pools/
 ├── app/
 │   ├── config/          # Configuration files
 │   ├── controllers/     # Route controllers

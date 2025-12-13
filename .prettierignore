@@ -1,0 +1,4 @@
+# Ignore EJS template files to prevent formatter from breaking EJS syntax
+**/*.ejs
+app/views/**/*
+views/**/*

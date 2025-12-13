@@ -1,49 +1,49 @@
-const Settings = require('../models/Settings');
+const Settings = require('../models/Settings')
 
 exports.index = async (req, res) => {
   try {
-    const settings = await Settings.getSettings();
-    const Media = require('../models/Media');
+    const settings = await Settings.getSettings()
+    const Media = require('../models/Media')
     const media = await Media.find()
       .select('-sizes.thumbnail.data -sizes.medium.data -sizes.large.data')
       .sort({ createdAt: -1 })
       .limit(50)
-      .lean(); // Convert to plain objects for JSON serialization
-    
+      .lean() // Convert to plain objects for JSON serialization
+
     // Populate background image, logo, and ogImage if they exist
     if (settings.hero && settings.hero.backgroundImage) {
-      await settings.populate('hero.backgroundImage');
+      await settings.populate('hero.backgroundImage')
     }
     if (settings.logo) {
-      await settings.populate('logo');
+      await settings.populate('logo')
     }
     if (settings.ogImage) {
-      await settings.populate('ogImage');
+      await settings.populate('ogImage')
     }
-    
-    res.render('admin/settings/index', { 
+
+    res.render('admin/settings/index', {
       settings,
       media: media || [],
-      activePage: 'settings',
-    });
+      activePage: 'settings'
+    })
   } catch (error) {
-    console.error('Settings error:', error);
-    req.session.error = 'Error loading settings';
-    res.redirect('/admin');
+    console.error('Settings error:', error)
+    req.session.error = 'Error loading settings'
+    res.redirect('/admin')
   }
-};
+}
 
 exports.update = async (req, res) => {
   try {
-    const { theme, customColors, hero, company, socialMedia } = req.body;
-    
-    let settings = await Settings.findOne();
+    const { theme, customColors, hero, company, socialMedia } = req.body
+
+    let settings = await Settings.findOne()
     if (!settings) {
-      settings = new Settings();
+      settings = new Settings()
     }
-    
-    settings.theme = theme || 'default';
-    
+
+    settings.theme = theme || 'default'
+
     if (customColors) {
       settings.customColors = {
         primary: customColors.primary || settings.customColors.primary,
@@ -51,24 +51,37 @@ exports.update = async (req, res) => {
         success: customColors.success || settings.customColors.success,
         danger: customColors.danger || settings.customColors.danger,
         warning: customColors.warning || settings.customColors.warning,
-        info: customColors.info || settings.customColors.info,
-      };
+        info: customColors.info || settings.customColors.info
+      }
     }
-    
+
     if (hero) {
+      // Handle backgroundImage clearing - empty string means remove it
+      let backgroundImage = hero.backgroundImage
+      if (backgroundImage === '') {
+        backgroundImage = undefined
+      } else if (!backgroundImage) {
+        // If not provided, keep existing value
+        backgroundImage = settings.hero?.backgroundImage || undefined
+      }
+
       settings.hero = {
         enabled: hero.enabled === 'on' || hero.enabled === true,
-        title: hero.title || settings.hero?.title || 'Welcome to PPSG',
+        title: hero.title || settings.hero?.title || 'Welcome to T & M Pools',
         subtitle: hero.subtitle || settings.hero?.subtitle || '',
-        buttonText: hero.buttonText || settings.hero?.buttonText || 'Get in Touch',
+        buttonText:
+          hero.buttonText || settings.hero?.buttonText || 'Get in Touch',
         buttonLink: hero.buttonLink || settings.hero?.buttonLink || '/contact',
         textColor: hero.textColor || settings.hero?.textColor || '#ffffff',
-        backgroundImage: hero.backgroundImage || settings.hero?.backgroundImage || undefined,
-        overlayOpacity: parseFloat(hero.overlayOpacity) || settings.hero?.overlayOpacity || 0.5,
-        height: hero.height || settings.hero?.height || 'medium',
-      };
+        backgroundImage: backgroundImage,
+        overlayOpacity:
+          parseFloat(hero.overlayOpacity) ||
+          settings.hero?.overlayOpacity ||
+          0.5,
+        height: hero.height || settings.hero?.height || 'medium'
+      }
     }
-    
+
     if (company) {
       settings.company = {
         name: company.name || settings.company?.name || '',
@@ -78,62 +91,63 @@ exports.update = async (req, res) => {
         zipCode: company.zipCode || settings.company?.zipCode || '',
         phone: company.phone || settings.company?.phone || '',
         email: company.email || settings.company?.email || '',
-        copyright: company.copyright || settings.company?.copyright || '',
-      };
+        copyright: company.copyright || settings.company?.copyright || ''
+      }
     }
-    
+
     if (socialMedia) {
       settings.socialMedia = {
         facebook: socialMedia.facebook || settings.socialMedia?.facebook || '',
         twitter: socialMedia.twitter || settings.socialMedia?.twitter || '',
-        instagram: socialMedia.instagram || settings.socialMedia?.instagram || '',
+        instagram:
+          socialMedia.instagram || settings.socialMedia?.instagram || '',
         linkedin: socialMedia.linkedin || settings.socialMedia?.linkedin || '',
         youtube: socialMedia.youtube || settings.socialMedia?.youtube || '',
-        tiktok: socialMedia.tiktok || settings.socialMedia?.tiktok || '',
-      };
+        tiktok: socialMedia.tiktok || settings.socialMedia?.tiktok || ''
+      }
     }
-    
+
     // Handle logo
     if (req.body.logo) {
-      settings.logo = req.body.logo || undefined;
+      settings.logo = req.body.logo || undefined
     } else if (req.body.logo === '') {
       // Empty string means remove logo
-      settings.logo = undefined;
+      settings.logo = undefined
     }
-    
+
     // Handle ogImage
     if (req.body.ogImage) {
-      settings.ogImage = req.body.ogImage || undefined;
+      settings.ogImage = req.body.ogImage || undefined
     } else if (req.body.ogImage === '') {
       // Empty string means remove ogImage
-      settings.ogImage = undefined;
+      settings.ogImage = undefined
     }
-    
-    await settings.save();
-    
-    req.session.success = 'Settings updated successfully';
-    res.redirect('/admin/settings');
+
+    await settings.save()
+
+    req.session.success = 'Settings updated successfully'
+    res.redirect('/admin/settings')
   } catch (error) {
-    console.error('Settings update error:', error);
-    req.session.error = 'Error updating settings';
-    res.redirect('/admin/settings');
+    console.error('Settings update error:', error)
+    req.session.error = 'Error updating settings'
+    res.redirect('/admin/settings')
   }
-};
+}
 
 // API endpoint to get theme CSS
 exports.getThemeCSS = async (req, res) => {
   try {
-    const settings = await Settings.getSettings();
-    const css = generateThemeCSS(settings);
-    res.set('Content-Type', 'text/css');
-    res.send(css);
+    const settings = await Settings.getSettings()
+    const css = generateThemeCSS(settings)
+    res.set('Content-Type', 'text/css')
+    res.send(css)
   } catch (error) {
-    console.error('Theme CSS error:', error);
-    res.status(500).send('/* Error loading theme */');
+    console.error('Theme CSS error:', error)
+    res.status(500).send('/* Error loading theme */')
   }
-};
+}
 
-function generateThemeCSS(settings) {
+function generateThemeCSS (settings) {
   const themes = {
     default: {
       primary: '#0d6efd',
@@ -141,7 +155,7 @@ function generateThemeCSS(settings) {
       success: '#198754',
       danger: '#dc3545',
       warning: '#ffc107',
-      info: '#0dcaf0',
+      info: '#0dcaf0'
     },
     ocean: {
       primary: '#0066cc',
@@ -149,7 +163,7 @@ function generateThemeCSS(settings) {
       success: '#00a86b',
       danger: '#e63946',
       warning: '#ffb347',
-      info: '#00ced1',
+      info: '#00ced1'
     },
     sky: {
       primary: '#007bff',
@@ -157,7 +171,7 @@ function generateThemeCSS(settings) {
       success: '#28a745',
       danger: '#e74c3c',
       warning: '#f39c12',
-      info: '#17a2b8',
+      info: '#17a2b8'
     },
     navy: {
       primary: '#001f3f',
@@ -165,7 +179,7 @@ function generateThemeCSS(settings) {
       success: '#27ae60',
       danger: '#c0392b',
       warning: '#f1c40f',
-      info: '#3498db',
+      info: '#3498db'
     },
     royal: {
       primary: '#4169e1',
@@ -173,7 +187,7 @@ function generateThemeCSS(settings) {
       success: '#32cd32',
       danger: '#ff4500',
       warning: '#ffd700',
-      info: '#1e90ff',
+      info: '#1e90ff'
     },
     teal: {
       primary: '#008080',
@@ -181,17 +195,17 @@ function generateThemeCSS(settings) {
       success: '#2ecc71',
       danger: '#e74c3c',
       warning: '#f39c12',
-      info: '#1abc9c',
-    },
-  };
-  
-  let colors;
-  if (settings.theme === 'custom') {
-    colors = settings.customColors;
-  } else {
-    colors = themes[settings.theme] || themes.default;
+      info: '#1abc9c'
+    }
   }
-  
+
+  let colors
+  if (settings.theme === 'custom') {
+    colors = settings.customColors
+  } else {
+    colors = themes[settings.theme] || themes.default
+  }
+
   return `
     :root {
       --bs-primary: ${colors.primary};
@@ -225,7 +239,10 @@ function generateThemeCSS(settings) {
     }
     
     .admin-sidebar {
-      background: linear-gradient(135deg, ${colors.primary} 0%, ${darkenColor(colors.primary, 20)} 100%);
+      background: linear-gradient(135deg, ${colors.primary} 0%, ${darkenColor(
+    colors.primary,
+    20
+  )} 100%);
     }
     
     a {
@@ -235,15 +252,14 @@ function generateThemeCSS(settings) {
     a:hover {
       color: ${darkenColor(colors.primary, 15)};
     }
-  `;
+  `
 }
 
-function darkenColor(color, percent) {
-  const num = parseInt(color.replace('#', ''), 16);
-  const amt = Math.round(2.55 * percent);
-  const R = Math.max(0, Math.min(255, (num >> 16) + -amt));
-  const G = Math.max(0, Math.min(255, ((num >> 8) & 0x00FF) + -amt));
-  const B = Math.max(0, Math.min(255, (num & 0x0000FF) + -amt));
-  return '#' + (0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1);
+function darkenColor (color, percent) {
+  const num = parseInt(color.replace('#', ''), 16)
+  const amt = Math.round(2.55 * percent)
+  const R = Math.max(0, Math.min(255, (num >> 16) + -amt))
+  const G = Math.max(0, Math.min(255, ((num >> 8) & 0x00ff) + -amt))
+  const B = Math.max(0, Math.min(255, (num & 0x0000ff) + -amt))
+  return '#' + (0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1)
 }
-

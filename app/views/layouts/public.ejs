@@ -7,7 +7,7 @@
     <% 
     // SEO Meta Tags
     const seoTitle = typeof seoData !== 'undefined' && seoData.title ? seoData.title : (typeof title !== 'undefined' ? title : '');
-    const pageTitle = seoTitle ? `${seoTitle} - PPSG` : 'PPSG';
+    const pageTitle = seoTitle ? `${seoTitle} - T & M Pools` : 'T & M Pools';
     const metaDescription = typeof seoData !== 'undefined' && seoData.description ? seoData.description : '';
     const metaKeywords = typeof seoData !== 'undefined' && seoData.keywords ? seoData.keywords : '';
     let ogImage = typeof seoData !== 'undefined' && seoData.ogImage ? seoData.ogImage : null;
@@ -38,7 +38,7 @@
     if (!ogUrl && typeof req !== 'undefined') {
         ogUrl = getAbsoluteUrl(req.originalUrl || '/');
     }
-    const siteName = typeof siteSettings !== 'undefined' && siteSettings.company && siteSettings.company.name ? siteSettings.company.name : 'PPSG';
+    const siteName = typeof siteSettings !== 'undefined' && siteSettings.company && siteSettings.company.name ? siteSettings.company.name : 'T & M Pools';
     %>
     
     <title><%= pageTitle %></title>
@@ -97,4 +97,3 @@
     <script src="/js/main.js"></script>
 </body>
 </html>
-

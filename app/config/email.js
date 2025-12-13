@@ -1,4 +1,4 @@
-const nodemailer = require('nodemailer');
+const nodemailer = require('nodemailer')
 
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST || 'smtp.gmail.com',
@@ -6,28 +6,31 @@ const transporter = nodemailer.createTransport({
   secure: false,
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
+    pass: process.env.EMAIL_PASS
+  }
+})
 
-const sendContactEmail = async (contactData) => {
-  let sizesHtml = '';
+const sendContactEmail = async contactData => {
+  let sizesHtml = ''
   if (contactData.selectedSizes && contactData.selectedSizes.length > 0) {
-    sizesHtml = '<p><strong>Selected Sizes:</strong></p><ul>';
+    sizesHtml = '<p><strong>Selected Sizes:</strong></p><ul>'
     if (Array.isArray(contactData.selectedSizes)) {
       contactData.selectedSizes.forEach(size => {
-        const priceText = size.price ? ` - $${parseFloat(size.price).toFixed(2)}` : '';
-        const descText = size.description ? ` (${size.description})` : '';
-        sizesHtml += `<li><strong>${size.name}</strong>${priceText}${descText}</li>`;
-      });
+        const priceText = size.price
+          ? ` - $${parseFloat(size.price).toFixed(2)}`
+          : ''
+        const descText = size.description ? ` (${size.description})` : ''
+        sizesHtml += `<li><strong>${size.name}</strong>${priceText}${descText}</li>`
+      })
     }
-    sizesHtml += '</ul>';
+    sizesHtml += '</ul>'
   }
 
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to: process.env.EMAIL_TO || 'aquarianpoolandspa@gmail.com',
-    subject: contactData.productName 
+    cc: process.env.EMAIL_CC || 'tandmpool@gmail.com',
+    subject: contactData.productName
       ? `Product Inquiry: ${contactData.productName} from ${contactData.name}`
       : `New Contact Form Submission from ${contactData.name}`,
     html: `
@@ -35,23 +38,34 @@ const sendContactEmail = async (contactData) => {
       <p><strong>Name:</strong> ${contactData.name}</p>
       <p><strong>Email:</strong> ${contactData.email}</p>
       <p><strong>Phone:</strong> ${contactData.phone || 'Not provided'}</p>
-      ${contactData.town ? `<p><strong>Town:</strong> ${contactData.town}</p>` : ''}
-      ${contactData.reason ? `<p><strong>Reason for Contact:</strong> ${contactData.reason}</p>` : ''}
-      ${contactData.productName ? `<p><strong>Product:</strong> ${contactData.productName}</p>` : ''}
+      ${
+        contactData.town
+          ? `<p><strong>Town:</strong> ${contactData.town}</p>`
+          : ''
+      }
+      ${
+        contactData.reason
+          ? `<p><strong>Reason for Contact:</strong> ${contactData.reason}</p>`
+          : ''
+      }
+      ${
+        contactData.productName
+          ? `<p><strong>Product:</strong> ${contactData.productName}</p>`
+          : ''
+      }
       ${sizesHtml}
       <p><strong>Message:</strong></p>
       <p>${contactData.message.replace(/\n/g, '<br>')}</p>
-    `,
-  };
+    `
+  }
 
   try {
-    await transporter.sendMail(mailOptions);
-    return true;
+    await transporter.sendMail(mailOptions)
+    return true
   } catch (error) {
-    console.error('Email sending error:', error);
-    return false;
+    console.error('Email sending error:', error)
+    return false
   }
-};
+}
 
-module.exports = { sendContactEmail };
-
+module.exports = { sendContactEmail }
