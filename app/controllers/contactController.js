@@ -1,5 +1,4 @@
 const Contact = require('../models/Contact')
-const Product = require('../models/Product')
 const { sendContactEmail } = require('../config/email')
 
 exports.submit = async (req, res) => {
@@ -20,20 +19,8 @@ exports.submit = async (req, res) => {
     if (!name || !email || !message || !reason) {
       req.session.error =
         'Name, email, reason for contact, and message are required'
-      // Redirect back to where form came from
-      if (from === 'product' && productId) {
-        try {
-          const product = await Product.findById(productId).select('slug')
-          if (product && product.slug) {
-            return res.redirect(`/products/${product.slug}`)
-          }
-        } catch (err) {
-          console.error('Error finding product for redirect:', err)
-        }
-        // Fallback to products list if product not found
-        return res.redirect('/products')
-      }
-      return res.redirect(from === 'home' ? '/' : '/contact')
+      // Always redirect to home page
+      return res.redirect('/')
     }
 
     const contact = new Contact({
@@ -81,37 +68,13 @@ exports.submit = async (req, res) => {
         'Your message has been received. We will get back to you soon.'
     }
 
-    // Redirect back to where form came from
-    if (from === 'product' && productId) {
-      try {
-        const product = await Product.findById(productId).select('slug')
-        if (product && product.slug) {
-          return res.redirect(`/products/${product.slug}`)
-        }
-      } catch (err) {
-        console.error('Error finding product for redirect:', err)
-      }
-      // Fallback to products list if product not found
-      return res.redirect('/products')
-    }
-    res.redirect(from === 'home' ? '/' : '/contact')
+    // Always redirect to home page
+    return res.redirect('/')
   } catch (error) {
     console.error('Contact form error:', error)
     req.session.error = 'Error submitting form. Please try again.'
-    const { from, productId } = req.body
-    if (from === 'product' && productId) {
-      try {
-        const product = await Product.findById(productId).select('slug')
-        if (product && product.slug) {
-          return res.redirect(`/products/${product.slug}`)
-        }
-      } catch (err) {
-        console.error('Error finding product for redirect:', err)
-      }
-      // Fallback to products list if product not found
-      return res.redirect('/products')
-    }
-    res.redirect(from === 'home' ? '/' : '/contact')
+    // Always redirect to home page
+    return res.redirect('/')
   }
 }
 
