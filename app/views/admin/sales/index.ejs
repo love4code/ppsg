@@ -1,0 +1,135 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-cart"></i> Sales</h2>
+    <a href="/admin/sales/new" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> New Sale
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="GET" class="mb-3">
+            <div class="row g-2">
+                <div class="col-md-3">
+                    <select class="form-select" name="customer">
+                        <option value="">All Customers</option>
+                        <% customers.forEach(cust => { %>
+                            <option value="<%= cust._id %>" <%= customerFilter === cust._id.toString() ? 'selected' : '' %>><%= cust.name %></option>
+                        <% }); %>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select" name="status">
+                        <option value="">All Statuses</option>
+                        <option value="draft" <%= statusFilter === 'draft' ? 'selected' : '' %>>Draft</option>
+                        <option value="open" <%= statusFilter === 'open' ? 'selected' : '' %>>Open</option>
+                        <option value="paid" <%= statusFilter === 'paid' ? 'selected' : '' %>>Paid</option>
+                        <option value="cancelled" <%= statusFilter === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select" name="paymentStatus">
+                        <option value="">All Payment Statuses</option>
+                        <option value="unpaid" <%= paymentFilter === 'unpaid' ? 'selected' : '' %>>Unpaid</option>
+                        <option value="partial" <%= paymentFilter === 'partial' ? 'selected' : '' %>>Partial</option>
+                        <option value="paid" <%= paymentFilter === 'paid' ? 'selected' : '' %>>Paid</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <input type="date" class="form-control" name="dateFrom" value="<%= dateFrom || '' %>" placeholder="From">
+                </div>
+                <div class="col-md-2">
+                    <input type="date" class="form-control" name="dateTo" value="<%= dateTo || '' %>" placeholder="To">
+                </div>
+                <div class="col-md-1">
+                    <button type="submit" class="btn btn-outline-primary w-100">
+                        <i class="bi bi-filter"></i>
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Customer</th>
+                        <th>Status</th>
+                        <th>Payment</th>
+                        <th>Subtotal</th>
+                        <th>Tax</th>
+                        <th>Total</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (sales.length > 0) { %>
+                        <% sales.forEach(sale => { %>
+                            <tr>
+                                <td><%= new Date(sale.saleDate).toLocaleDateString() %></td>
+                                <td>
+                                    <strong><%= sale.customer.name %></strong><br>
+                                    <small class="text-muted"><%= sale.customer.email || '' %></small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-<%= sale.status === 'paid' ? 'success' : sale.status === 'cancelled' ? 'danger' : sale.status === 'draft' ? 'secondary' : 'warning' %>">
+                                        <%= sale.status %>
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-<%= sale.paymentStatus === 'paid' ? 'success' : sale.paymentStatus === 'partial' ? 'warning' : 'danger' %>">
+                                        <%= sale.paymentStatus %>
+                                    </span>
+                                </td>
+                                <td>$<%= sale.subtotal.toFixed(2) %></td>
+                                <td>$<%= sale.taxTotal.toFixed(2) %></td>
+                                <td><strong>$<%= sale.total.toFixed(2) %></strong></td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="/admin/sales/<%= sale._id %>" class="btn btn-outline-primary">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="/admin/sales/<%= sale._id %>/edit" class="btn btn-outline-primary">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <form action="/admin/sales/<%= sale._id %>?_method=DELETE" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to cancel this sale?');">
+                                            <button type="submit" class="btn btn-outline-danger">
+                                                <i class="bi bi-x-circle"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="8" class="text-center text-muted py-4">No sales found.</td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+
+        <% if (totalPages > 1) { %>
+            <nav>
+                <ul class="pagination justify-content-center">
+                    <% if (currentPage > 1) { %>
+                        <li class="page-item">
+                            <a class="page-link" href="?page=<%= currentPage - 1 %><%= statusFilter ? '&status=' + statusFilter : '' %><%= paymentFilter ? '&paymentStatus=' + paymentFilter : '' %><%= customerFilter ? '&customer=' + customerFilter : '' %><%= dateFrom ? '&dateFrom=' + dateFrom : '' %><%= dateTo ? '&dateTo=' + dateTo : '' %>">Previous</a>
+                        </li>
+                    <% } %>
+                    <% for (let i = 1; i <= totalPages; i++) { %>
+                        <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                            <a class="page-link" href="?page=<%= i %><%= statusFilter ? '&status=' + statusFilter : '' %><%= paymentFilter ? '&paymentStatus=' + paymentFilter : '' %><%= customerFilter ? '&customer=' + customerFilter : '' %><%= dateFrom ? '&dateFrom=' + dateFrom : '' %><%= dateTo ? '&dateTo=' + dateTo : '' %>"><%= i %></a>
+                        </li>
+                    <% } %>
+                    <% if (currentPage < totalPages) { %>
+                        <li class="page-item">
+                            <a class="page-link" href="?page=<%= currentPage + 1 %><%= statusFilter ? '&status=' + statusFilter : '' %><%= paymentFilter ? '&paymentStatus=' + paymentFilter : '' %><%= customerFilter ? '&customer=' + customerFilter : '' %><%= dateFrom ? '&dateFrom=' + dateFrom : '' %><%= dateTo ? '&dateTo=' + dateTo : '' %>">Next</a>
+                        </li>
+                    <% } %>
+                </ul>
+            </nav>
+        <% } %>
+    </div>
+</div>

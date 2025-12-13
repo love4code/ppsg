@@ -1,108 +1,131 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose')
 
-const productSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  slug: {
-    type: String,
-    required: true,
-    unique: true,
-    lowercase: true,
-  },
-  description: {
-    type: String,
-    default: '',
-  },
-  price: {
-    type: Number,
-    min: 0,
-  },
-  startingAtPrice: {
-    type: Number,
-    min: 0,
-  },
-  manufacturer: {
-    type: String,
-    trim: true,
-  },
-  materials: {
-    type: String,
-    trim: true,
-  },
-  saltwaterCompatible: {
-    type: Boolean,
-    default: false,
-  },
-  sizes: [{
+const productSchema = new mongoose.Schema(
+  {
     name: {
       type: String,
       required: true,
-      trim: true,
+      trim: true
     },
-    price: {
-      type: Number,
-      min: 0,
+    slug: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true
+    },
+    sku: {
+      type: String,
+      unique: true,
+      sparse: true,
+      trim: true
+    },
+    category: {
+      type: String,
+      trim: true
     },
     description: {
       type: String,
-      default: '',
+      default: ''
     },
-  }],
-  isTaxable: {
-    type: Boolean,
-    default: true,
+    price: {
+      type: Number,
+      required: true,
+      min: 0
+    },
+    startingAtPrice: {
+      type: Number,
+      min: 0
+    },
+    manufacturer: {
+      type: String,
+      trim: true
+    },
+    materials: {
+      type: String,
+      trim: true
+    },
+    saltwaterCompatible: {
+      type: Boolean,
+      default: false
+    },
+    sizes: [
+      {
+        name: {
+          type: String,
+          required: true,
+          trim: true
+        },
+        price: {
+          type: Number,
+          min: 0
+        },
+        description: {
+          type: String,
+          default: ''
+        }
+      }
+    ],
+    isTaxable: {
+      type: Boolean,
+      default: true
+    },
+    isActive: {
+      type: Boolean,
+      default: true
+    },
+    mainImage: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Media'
+    },
+    gallery: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Media'
+      }
+    ],
+    status: {
+      type: String,
+      enum: ['draft', 'published'],
+      default: 'draft'
+    },
+    featured: {
+      type: Boolean,
+      default: false
+    },
+    // SEO Fields
+    metaTitle: {
+      type: String,
+      trim: true
+    },
+    metaDescription: {
+      type: String,
+      trim: true
+    },
+    keywords: [
+      {
+        type: String,
+        trim: true
+      }
+    ],
+    ogImage: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Media'
+    }
   },
-  mainImage: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Media',
-  },
-  gallery: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Media',
-  }],
-  status: {
-    type: String,
-    enum: ['draft', 'published'],
-    default: 'draft',
-  },
-  featured: {
-    type: Boolean,
-    default: false,
-  },
-  // SEO Fields
-  metaTitle: {
-    type: String,
-    trim: true,
-  },
-  metaDescription: {
-    type: String,
-    trim: true,
-  },
-  keywords: [{
-    type: String,
-    trim: true,
-  }],
-  ogImage: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Media',
-  },
-}, {
-  timestamps: true,
-});
+  {
+    timestamps: true
+  }
+)
 
 // Generate slug from name before saving
-productSchema.pre('save', function(next) {
+productSchema.pre('save', function (next) {
   if (!this.slug && this.name) {
     this.slug = this.name
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
+      .replace(/(^-|-$)/g, '')
   }
-  next();
-});
+  next()
+})
 
-module.exports = mongoose.model('Product', productSchema);
-
+module.exports = mongoose.model('Product', productSchema)

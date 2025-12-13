@@ -1,0 +1,144 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-pencil"></i> Edit Sale</h2>
+    <a href="/admin/sales/<%= sale._id %>" class="btn btn-outline-secondary">Cancel</a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form action="/admin/sales/<%= sale._id %>?_method=PUT" method="POST" id="saleForm">
+            <div class="row mb-4">
+                <div class="col-md-6 mb-3">
+                    <label for="customer" class="form-label">Customer *</label>
+                    <select class="form-select" id="customer" name="customer" required>
+                        <% customers.forEach(cust => { %>
+                            <option value="<%= cust._id %>" <%= sale.customer._id.toString() === cust._id.toString() ? 'selected' : '' %>><%= cust.name %> <% if (cust.email) { %>(<%= cust.email %>)<% } %></option>
+                        <% }); %>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="saleDate" class="form-label">Sale Date *</label>
+                    <input type="date" class="form-control" id="saleDate" name="saleDate" value="<%= new Date(sale.saleDate).toISOString().split('T')[0] %>" required>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="taxRate" class="form-label">Tax Rate (%)</label>
+                    <input type="number" class="form-control" id="taxRate" name="taxRate" step="0.0001" min="0" max="100" value="<%= (sale.taxRate * 100) %>" required>
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-3 mb-3">
+                    <label for="status" class="form-label">Status</label>
+                    <select class="form-select" id="status" name="status">
+                        <option value="draft" <%= sale.status === 'draft' ? 'selected' : '' %>>Draft</option>
+                        <option value="open" <%= sale.status === 'open' ? 'selected' : '' %>>Open</option>
+                        <option value="paid" <%= sale.status === 'paid' ? 'selected' : '' %>>Paid</option>
+                        <option value="cancelled" <%= sale.status === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="paymentStatus" class="form-label">Payment Status</label>
+                    <select class="form-select" id="paymentStatus" name="paymentStatus">
+                        <option value="unpaid" <%= sale.paymentStatus === 'unpaid' ? 'selected' : '' %>>Unpaid</option>
+                        <option value="partial" <%= sale.paymentStatus === 'partial' ? 'selected' : '' %>>Partial</option>
+                        <option value="paid" <%= sale.paymentStatus === 'paid' ? 'selected' : '' %>>Paid</option>
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="notes" class="form-label">Notes</label>
+                    <textarea class="form-control" id="notes" name="notes" rows="2"><%= sale.notes || '' %></textarea>
+                </div>
+            </div>
+
+            <hr>
+
+            <h5 class="mb-3">Line Items</h5>
+
+            <div class="mb-3">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="productSearch" placeholder="Search products...">
+                    <button type="button" class="btn btn-outline-primary" id="addProductBtn">
+                        <i class="bi bi-plus"></i> Add Product
+                    </button>
+                </div>
+                <div id="productSearchResults" class="list-group mt-2" style="position: absolute; z-index: 1000; max-height: 200px; overflow-y: auto; display: none;"></div>
+            </div>
+
+            <div class="table-responsive mb-4">
+                <table class="table table-bordered" id="lineItemsTable">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>SKU</th>
+                            <th>Quantity</th>
+                            <th>Unit Price</th>
+                            <th>Taxable</th>
+                            <th>Subtotal</th>
+                            <th>Tax</th>
+                            <th>Total</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lineItemsBody">
+                        <% sale.lineItems.forEach((item, index) => { %>
+                            <tr data-item-index="<%= index %>">
+                                <td>
+                                    <input type="hidden" name="lineItems[<%= index %>][productId]" value="<%= item.productId || '' %>">
+                                    <input type="text" class="form-control" name="lineItems[<%= index %>][name]" value="<%= item.name %>" required readonly>
+                                    <textarea class="form-control mt-1" name="lineItems[<%= index %>][description]" rows="1" placeholder="Description"><%= item.description || '' %></textarea>
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control" name="lineItems[<%= index %>][sku]" value="<%= item.sku || '' %>" readonly>
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control quantity-input" name="lineItems[<%= index %>][quantity]" value="<%= item.quantity %>" min="1" step="1" required>
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control price-input" name="lineItems[<%= index %>][unitPrice]" value="<%= item.unitPrice %>" min="0" step="0.01" required>
+                                </td>
+                                <td>
+                                    <input type="checkbox" class="form-check-input taxable-checkbox" name="lineItems[<%= index %>][taxable]" value="true" <%= item.taxable ? 'checked' : '' %>>
+                                </td>
+                                <td class="line-subtotal">$<%= item.lineSubtotal.toFixed(2) %></td>
+                                <td class="line-tax">$<%= item.lineTax.toFixed(2) %></td>
+                                <td class="line-total"><strong>$<%= item.lineTotal.toFixed(2) %></strong></td>
+                                <td>
+                                    <button type="button" class="btn btn-sm btn-outline-danger remove-line-item">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="5" class="text-end"><strong>Subtotal:</strong></td>
+                            <td><strong id="previewSubtotal">$<%= sale.subtotal.toFixed(2) %></strong></td>
+                            <td colspan="2"></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td colspan="5" class="text-end"><strong>Tax:</strong></td>
+                            <td colspan="1"></td>
+                            <td><strong id="previewTaxTotal">$<%= sale.taxTotal.toFixed(2) %></strong></td>
+                            <td colspan="1"></td>
+                            <td></td>
+                        </tr>
+                        <tr class="table-primary">
+                            <td colspan="5" class="text-end"><strong>Total:</strong></td>
+                            <td colspan="2"></td>
+                            <td><strong id="previewTotal">$<%= sale.total.toFixed(2) %></strong></td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Update Sale</button>
+                <a href="/admin/sales/<%= sale._id %>" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="/js/admin-sales.js"></script>
