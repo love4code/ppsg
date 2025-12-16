@@ -107,4 +107,75 @@ router.post('/settings', settingsController.update)
 router.put('/settings', settingsController.update)
 router.get('/api/theme.css', settingsController.getThemeCSS)
 
+// Diagnostic route (for debugging database issues)
+router.get('/diagnostics', async (req, res) => {
+  const mongoose = require('mongoose')
+  const Product = require('../models/Product')
+  const Project = require('../models/Project')
+  const Service = require('../models/Service')
+  const Settings = require('../models/Settings')
+
+  const diagnostics = {
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development',
+    database: {
+      connectionState: mongoose.connection.readyState,
+      connectionStateName: [
+        'disconnected',
+        'connected',
+        'connecting',
+        'disconnecting'
+      ][mongoose.connection.readyState],
+      databaseName: mongoose.connection.db
+        ? mongoose.connection.db.databaseName
+        : 'N/A',
+      host: mongoose.connection.host || 'N/A',
+      port: mongoose.connection.port || 'N/A',
+      mongodbUriSet: !!process.env.MONGODB_URI,
+      mongodbUriMasked: process.env.MONGODB_URI
+        ? process.env.MONGODB_URI.replace(/\/\/([^:]+):([^@]+)@/, '//***:***@')
+        : 'NOT SET'
+    },
+    data: {
+      products: { total: 0, published: 0 },
+      projects: { total: 0, published: 0 },
+      services: { total: 0, published: 0 },
+      settings: { exists: false }
+    },
+    errors: []
+  }
+
+  try {
+    if (mongoose.connection.readyState === 1) {
+      // Test queries
+      diagnostics.data.products.total = await Product.countDocuments({})
+      diagnostics.data.products.published = await Product.countDocuments({
+        status: 'published'
+      })
+
+      diagnostics.data.projects.total = await Project.countDocuments({})
+      diagnostics.data.projects.published = await Project.countDocuments({
+        status: 'published'
+      })
+
+      diagnostics.data.services.total = await Service.countDocuments({})
+      diagnostics.data.services.published = await Service.countDocuments({
+        status: 'published'
+      })
+
+      const settings = await Settings.findOne()
+      diagnostics.data.settings.exists = !!settings
+    } else {
+      diagnostics.errors.push(
+        'Database is not connected. Connection state: ' +
+          diagnostics.database.connectionStateName
+      )
+    }
+  } catch (error) {
+    diagnostics.errors.push('Error running diagnostics: ' + error.message)
+  }
+
+  res.json(diagnostics)
+})
+
 module.exports = router

@@ -327,6 +327,19 @@ const withTimeout = (promise, timeoutMs = 5000) => {
 // Public routes
 exports.publicIndex = async (req, res) => {
   try {
+    const mongoose = require('mongoose')
+
+    // Check database connection before queries
+    // If not connected, show empty page instead of crashing
+    if (mongoose.connection.readyState !== 1) {
+      console.warn('⚠️  Database not connected, showing empty products page')
+      return res.render('public/products/index', {
+        products: [],
+        currentPage: 1,
+        totalPages: 0
+      })
+    }
+
     const page = parseInt(req.query.page) || 1
     const limit = 12
     const skip = (page - 1) * limit
@@ -349,13 +362,31 @@ exports.publicIndex = async (req, res) => {
 
     const totalPages = Math.ceil(total / limit)
 
+    // Log if no products found
+    if (products.length === 0 && page === 1) {
+      console.warn('⚠️  Products page: No published products found in database')
+    }
+
     res.render('public/products/index', {
       products,
       currentPage: page,
       totalPages
     })
   } catch (error) {
-    console.error('Error loading products:', error.message)
+    console.error('❌ Error loading products:', error.message)
+    console.error('❌ Error code:', error.code || 'UNKNOWN')
+
+    // Log database connection state
+    const mongoose = require('mongoose')
+    const dbState = mongoose.connection.readyState
+    const states = {
+      0: 'disconnected',
+      1: 'connected',
+      2: 'connecting',
+      3: 'disconnecting'
+    }
+    console.error(`❌ Database state: ${states[dbState]} (${dbState})`)
+
     // If timeout or error, show empty state instead of redirecting
     res.render('public/products/index', {
       products: [],

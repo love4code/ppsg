@@ -10,6 +10,19 @@ const app = express()
 
 // Database connection
 const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/ppsg-cms'
+
+// Log connection details (masked for security)
+if (process.env.NODE_ENV === 'production') {
+  const maskedUri = mongoUri
+    ? mongoUri.replace(/\/\/([^:]+):([^@]+)@/, '//***:***@')
+    : 'NOT SET'
+  console.log('🔌 Attempting MongoDB connection...')
+  console.log('🔌 Connection string (masked):', maskedUri)
+  console.log('🔌 MONGODB_URI set:', !!process.env.MONGODB_URI)
+} else {
+  console.log('🔌 Attempting MongoDB connection to:', mongoUri)
+}
+
 mongoose
   .connect(mongoUri, {
     useNewUrlParser: true,
@@ -23,13 +36,26 @@ mongoose
   })
   .then(() => {
     console.log('✅ MongoDB connected successfully')
+    console.log('✅ Database name:', mongoose.connection.db.databaseName)
+    console.log(
+      '✅ Connection state:',
+      mongoose.connection.readyState === 1 ? 'connected' : 'not connected'
+    )
   })
   .catch(err => {
     console.error('❌ MongoDB connection error:', err.message)
+    console.error('❌ Error code:', err.code || 'UNKNOWN')
     console.error(
       '⚠️  Make sure MongoDB is running and the connection string is correct'
     )
-    console.error('⚠️  Connection string:', mongoUri)
+    if (process.env.NODE_ENV === 'production') {
+      const maskedUri = mongoUri
+        ? mongoUri.replace(/\/\/([^:]+):([^@]+)@/, '//***:***@')
+        : 'NOT SET'
+      console.error('⚠️  Connection string (masked):', maskedUri)
+    } else {
+      console.error('⚠️  Connection string:', mongoUri)
+    }
     // Don't exit - let the app start but it will fail on database operations
   })
 
@@ -143,6 +169,10 @@ app.use((req, res, next) => {
   next()
 })
 
+// Database connection check middleware (for logging)
+const { checkDatabaseConnection } = require('./app/middleware/dbCheck')
+app.use(checkDatabaseConnection)
+
 // Load settings for all views
 const { loadSettings } = require('./app/middleware/settings')
 app.use(loadSettings)
@@ -197,8 +227,24 @@ app.use((err, req, res, next) => {
 
 // 404 handler
 app.use((req, res) => {
-  res.locals.layout = false // Disable layout for error pages
-  res.status(404).render('errors/404')
+  try {
+    res.locals.layout = false // Disable layout for error pages
+    res.status(404).render('errors/404')
+  } catch (error) {
+    console.error('Error rendering 404 page:', error)
+    // Fallback to plain HTML if rendering fails
+    res.status(404).send(`
+      <!DOCTYPE html>
+      <html>
+        <head><title>404 - Page Not Found</title></head>
+        <body>
+          <h1>404 - Page Not Found</h1>
+          <p>The page you're looking for doesn't exist.</p>
+          <a href="/">Go Home</a>
+        </body>
+      </html>
+    `)
+  }
 })
 
 // Start server

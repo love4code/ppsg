@@ -173,12 +173,42 @@ exports.delete = async (req, res) => {
 // Public routes
 exports.publicIndex = async (req, res) => {
   try {
+    const mongoose = require('mongoose')
+
+    // Check database connection before queries
+    // If not connected, show empty page instead of crashing
+    if (mongoose.connection.readyState !== 1) {
+      console.warn('⚠️  Database not connected, showing empty services page')
+      return res.render('public/services/index', {
+        services: []
+      })
+    }
+
     const services = await Service.find({ status: 'published' }).sort({
       createdAt: -1
     })
 
+    // Log if no services found
+    if (services.length === 0) {
+      console.warn('⚠️  Services page: No published services found in database')
+    }
+
     res.render('public/services/index', { services })
   } catch (error) {
+    console.error('❌ Error loading services:', error.message)
+    console.error('❌ Error code:', error.code || 'UNKNOWN')
+
+    // Log database connection state
+    const mongoose = require('mongoose')
+    const dbState = mongoose.connection.readyState
+    const states = {
+      0: 'disconnected',
+      1: 'connected',
+      2: 'connecting',
+      3: 'disconnecting'
+    }
+    console.error(`❌ Database state: ${states[dbState]} (${dbState})`)
+
     req.session.error = 'Error loading services'
     res.redirect('/')
   }
