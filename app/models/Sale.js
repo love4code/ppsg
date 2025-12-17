@@ -152,3 +152,4 @@ saleSchema.methods.calculateTotals = function () {
 }
 
 module.exports = mongoose.model('Sale', saleSchema)
+

@@ -1,16 +1,70 @@
 const nodemailer = require('nodemailer')
 
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-  port: parseInt(process.env.EMAIL_PORT) || 587,
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
+// Check if email credentials are configured
+// Support both EMAIL_* and SMTP_* variable names for compatibility
+const isEmailConfigured = () => {
+  return !!(
+    (process.env.EMAIL_USER || process.env.SMTP_USER) &&
+    (process.env.EMAIL_PASS || process.env.SMTP_PASS)
+  )
+}
+
+// Get email configuration with fallback to both naming conventions
+const getEmailConfig = () => {
+  return {
+    host: process.env.EMAIL_HOST || process.env.SMTP_HOST || 'smtp.gmail.com',
+    port: parseInt(process.env.EMAIL_PORT || process.env.SMTP_PORT || '587'),
+    user: process.env.EMAIL_USER || process.env.SMTP_USER,
+    pass: process.env.EMAIL_PASS || process.env.SMTP_PASS,
+    from:
+      process.env.FROM_EMAIL || process.env.EMAIL_USER || process.env.SMTP_USER,
+    to:
+      process.env.EMAIL_TO ||
+      process.env.CONTACT_RECEIVER ||
+      'aquarianpoolandspa@gmail.com',
+    cc: process.env.EMAIL_CC
   }
-})
+}
+
+// Only create transporter if credentials are available
+let transporter = null
+if (isEmailConfigured()) {
+  const config = getEmailConfig()
+  transporter = nodemailer.createTransport({
+    host: config.host,
+    port: config.port,
+    secure: false,
+    auth: {
+      user: config.user,
+      pass: config.pass
+    }
+  })
+  console.log('✅ Email transporter configured')
+} else {
+  console.warn(
+    '⚠️  Email not configured: EMAIL_USER/SMTP_USER and/or EMAIL_PASS/SMTP_PASS environment variables are not set'
+  )
+  console.warn(
+    '⚠️  Contact form submissions will be saved to database but emails will not be sent'
+  )
+}
 
 const sendContactEmail = async contactData => {
+  // Check if email is configured
+  if (!isEmailConfigured()) {
+    console.error(
+      '❌ Cannot send email: EMAIL_USER/SMTP_USER and/or EMAIL_PASS/SMTP_PASS not configured'
+    )
+    return false
+  }
+
+  if (!transporter) {
+    console.error('❌ Email transporter not initialized')
+    return false
+  }
+
+  const config = getEmailConfig()
+
   let sizesHtml = ''
   if (contactData.selectedSizes && contactData.selectedSizes.length > 0) {
     sizesHtml = '<p><strong>Selected Sizes:</strong></p><ul>'
@@ -27,9 +81,9 @@ const sendContactEmail = async contactData => {
   }
 
   const mailOptions = {
-    from: process.env.EMAIL_USER,
-    to: process.env.EMAIL_TO || 'aquarianpoolandspa@gmail.com',
-    cc: process.env.EMAIL_CC || 'tandmpool@gmail.com',
+    from: config.from,
+    to: config.to,
+    ...(config.cc && { cc: config.cc }),
     subject: contactData.productName
       ? `Product Inquiry: ${contactData.productName} from ${contactData.name}`
       : `New Contact Form Submission from ${contactData.name}`,
@@ -60,10 +114,16 @@ const sendContactEmail = async contactData => {
   }
 
   try {
-    await transporter.sendMail(mailOptions)
+    const info = await transporter.sendMail(mailOptions)
+    console.log('✅ Email sent successfully:', info.messageId)
     return true
   } catch (error) {
-    console.error('Email sending error:', error)
+    console.error('❌ Email sending error:')
+    console.error('   Error code:', error.code)
+    console.error('   Error message:', error.message)
+    if (error.response) {
+      console.error('   SMTP response:', error.response)
+    }
     return false
   }
 }
