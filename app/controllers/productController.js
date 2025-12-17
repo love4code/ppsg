@@ -86,6 +86,7 @@ exports.store = async (req, res) => {
       status,
       sizes,
       featured,
+      isPublic,
       metaTitle,
       metaDescription,
       keywords,
@@ -107,7 +108,7 @@ exports.store = async (req, res) => {
       }
     }
 
-    // Handle sizes - parse from form data
+    // Handle sizes - parse from form data (only name, no price or description)
     let sizesArray = []
     if (sizes && typeof sizes === 'object') {
       sizesArray = Object.keys(sizes)
@@ -115,12 +116,7 @@ exports.store = async (req, res) => {
           const size = sizes[key]
           if (size && size.name && size.name.trim()) {
             return {
-              name: size.name.trim(),
-              price:
-                size.price && size.price.trim()
-                  ? parseFloat(size.price)
-                  : undefined,
-              description: size.description ? size.description.trim() : ''
+              name: size.name.trim()
             }
           }
           return null
@@ -160,6 +156,7 @@ exports.store = async (req, res) => {
       sizes: sizesArray,
       status: status || 'draft',
       featured: featured === 'on' || featured === true,
+      isPublic: isPublic === 'on' || isPublic === true,
       metaTitle: metaTitle ? metaTitle.trim() : undefined,
       metaDescription: metaDescription ? metaDescription.trim() : undefined,
       keywords: keywordsArray,
@@ -212,6 +209,7 @@ exports.update = async (req, res) => {
       status,
       sizes,
       featured,
+      isPublic,
       metaTitle,
       metaDescription,
       keywords,
@@ -233,7 +231,7 @@ exports.update = async (req, res) => {
       }
     }
 
-    // Handle sizes - parse from form data
+    // Handle sizes - parse from form data (only name, no price or description)
     let sizesArray = []
     if (sizes && typeof sizes === 'object') {
       sizesArray = Object.keys(sizes)
@@ -241,12 +239,7 @@ exports.update = async (req, res) => {
           const size = sizes[key]
           if (size && size.name && size.name.trim()) {
             return {
-              name: size.name.trim(),
-              price:
-                size.price && size.price.trim()
-                  ? parseFloat(size.price)
-                  : undefined,
-              description: size.description ? size.description.trim() : ''
+              name: size.name.trim()
             }
           }
           return null
@@ -263,34 +256,41 @@ exports.update = async (req, res) => {
         .filter(k => k)
     }
 
-    const product = await Product.findByIdAndUpdate(
-      req.params.id,
-      {
-        name,
-        description,
-        price: price && price.trim() ? parseFloat(price) : null,
-        cost: cost && cost.trim() ? parseFloat(cost) : null,
-        startingAtPrice:
-          startingAtPrice && startingAtPrice.trim()
-            ? parseFloat(startingAtPrice)
-            : null,
-        manufacturer: manufacturer ? manufacturer.trim() : null,
-        materials: materials ? materials.trim() : null,
-        saltwaterCompatible:
-          saltwaterCompatible === 'on' || saltwaterCompatible === true,
-        isTaxable: isTaxable === 'on' || isTaxable === true,
-        mainImage: mainImage || undefined,
-        gallery: galleryArray,
-        sizes: sizesArray,
-        status: status || 'draft',
-        featured: featured === 'on' || featured === true,
-        metaTitle: metaTitle ? metaTitle.trim() : null,
-        metaDescription: metaDescription ? metaDescription.trim() : null,
-        keywords: keywordsArray,
-        ogImage: ogImage || undefined
-      },
-      { new: true, runValidators: true }
-    )
+    // Build update object - only include price if provided
+    const updateData = {
+      name,
+      description,
+      cost: cost && cost.trim() ? parseFloat(cost) : null,
+      startingAtPrice:
+        startingAtPrice && startingAtPrice.trim()
+          ? parseFloat(startingAtPrice)
+          : null,
+      manufacturer: manufacturer ? manufacturer.trim() : null,
+      materials: materials ? materials.trim() : null,
+      saltwaterCompatible:
+        saltwaterCompatible === 'on' || saltwaterCompatible === true,
+      isTaxable: isTaxable === 'on' || isTaxable === true,
+      mainImage: mainImage || undefined,
+      gallery: galleryArray,
+      sizes: sizesArray,
+      status: status || 'draft',
+      featured: featured === 'on' || featured === true,
+      isPublic: isPublic === 'on' || isPublic === true,
+      metaTitle: metaTitle ? metaTitle.trim() : null,
+      metaDescription: metaDescription ? metaDescription.trim() : null,
+      keywords: keywordsArray,
+      ogImage: ogImage || undefined
+    }
+
+    // Only update price if a value is provided (preserve existing if not)
+    if (price && price.trim()) {
+      updateData.price = parseFloat(price)
+    }
+
+    const product = await Product.findByIdAndUpdate(req.params.id, updateData, {
+      new: true,
+      runValidators: true
+    })
 
     if (!product) {
       req.session.error = 'Product not found'
@@ -301,7 +301,9 @@ exports.update = async (req, res) => {
     res.redirect('/admin/products')
   } catch (error) {
     console.error('Update product error:', error)
-    req.session.error = 'Error updating product'
+    console.error('Error details:', error.message)
+    console.error('Error stack:', error.stack)
+    req.session.error = `Error updating product: ${error.message}`
     res.redirect(`/admin/products/${req.params.id}/edit`)
   }
 }
@@ -349,7 +351,7 @@ exports.publicIndex = async (req, res) => {
 
     // Add timeout to prevent hanging queries
     const products = await withTimeout(
-      Product.find({ status: 'published' })
+      Product.find({ status: 'published', isPublic: true })
         .populate('mainImage')
         .sort({ createdAt: -1 })
         .skip(skip)
@@ -359,7 +361,7 @@ exports.publicIndex = async (req, res) => {
     )
 
     const total = await withTimeout(
-      Product.countDocuments({ status: 'published' }),
+      Product.countDocuments({ status: 'published', isPublic: true }),
       5000
     )
 

@@ -96,6 +96,10 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: false
     },
+    isPublic: {
+      type: Boolean,
+      default: false
+    },
     // SEO Fields
     metaTitle: {
       type: String,

@@ -61,6 +61,14 @@
                         </label>
                     </div>
                 </div>
+                <div class="col-md-12 mb-3">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="isPublic" name="isPublic">
+                        <label class="form-check-label" for="isPublic">
+                            <strong>Public Product</strong> - Only products marked as public will be displayed on the public products page
+                        </label>
+                    </div>
+                </div>
             </div>
 
             <div class="row">
@@ -132,7 +140,7 @@
                 <button type="button" class="btn btn-sm btn-outline-primary mt-2" onclick="addSizeField()">
                     <i class="bi bi-plus"></i> Add Size
                 </button>
-                <small class="form-text text-muted d-block">Add different sizes with optional prices (e.g., Small, Medium, Large)</small>
+                <small class="form-text text-muted d-block">Add different sizes (e.g., Small, Medium, Large)</small>
             </div>
 
             <!-- SEO Section -->
@@ -424,17 +432,8 @@ function addSizeField() {
     sizeDiv.innerHTML = `
         <div class="card-body p-3">
             <div class="row g-2">
-                <div class="col-md-4">
-                    <input type="text" class="form-control" name="sizes[${sizeCounter}][name]" placeholder="Size name (e.g., Small)" required>
-                </div>
-                <div class="col-md-4">
-                    <div class="input-group">
-                        <span class="input-group-text">$</span>
-                        <input type="number" class="form-control" name="sizes[${sizeCounter}][price]" step="0.01" min="0" placeholder="Price (optional)">
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <input type="text" class="form-control" name="sizes[${sizeCounter}][description]" placeholder="Description (optional)">
+                <div class="col-md-11">
+                    <input type="text" class="form-control" name="sizes[${sizeCounter}][name]" placeholder="Size name (e.g., Small, Medium, Large)" required>
                 </div>
                 <div class="col-md-1">
                     <button type="button" class="btn btn-outline-danger w-100" onclick="removeSizeField(${sizeCounter})">

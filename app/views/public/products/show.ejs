@@ -18,20 +18,12 @@
                     <h4 class="mb-3">Available Sizes</h4>
                     <div class="d-flex flex-wrap gap-2" id="sizesContainer">
                         <% product.sizes.forEach((size, index) => { %>
-                            <button type="button" 
-                                    class="btn btn-outline-primary size-btn" 
-                                    data-size-name="<%= size.name %>"
-                                    data-size-price="<%= size.price || '' %>"
-                                    data-size-description="<%= size.description || '' %>"
-                                    onclick="selectSize(this)">
-                                <strong><%= size.name %></strong>
-                                <% if (size.price) { %>
-                                    - $<%= size.price.toFixed(2) %>
-                                <% } %>
-                                <% if (size.description) { %>
-                                    <br><small class="text-muted"><%= size.description %></small>
-                                <% } %>
-                            </button>
+                            <span class="badge rounded-pill bg-primary fs-6 px-3 py-2" 
+                                  style="cursor: pointer;"
+                                  data-size-name="<%= size.name %>"
+                                  onclick="selectSize(this)">
+                                <%= size.name %>
+                            </span>
                         <% }); %>
                     </div>
                     <div id="selectedSizes" class="mt-3" style="display: none;">
@@ -133,15 +125,11 @@
 <script>
 let selectedSizes = [];
 
-function selectSize(button) {
-    const sizeName = button.getAttribute('data-size-name');
-    const sizePrice = button.getAttribute('data-size-price');
-    const sizeDescription = button.getAttribute('data-size-description');
+function selectSize(element) {
+    const sizeName = element.getAttribute('data-size-name');
     
     const sizeData = {
-        name: sizeName,
-        price: sizePrice,
-        description: sizeDescription
+        name: sizeName
     };
     
     // Toggle selection
@@ -149,13 +137,13 @@ function selectSize(button) {
     if (index > -1) {
         // Remove if already selected
         selectedSizes.splice(index, 1);
-        button.classList.remove('btn-primary');
-        button.classList.add('btn-outline-primary');
+        element.classList.remove('bg-secondary');
+        element.classList.add('bg-primary');
     } else {
         // Add if not selected
         selectedSizes.push(sizeData);
-        button.classList.remove('btn-outline-primary');
-        button.classList.add('btn-primary');
+        element.classList.remove('bg-primary');
+        element.classList.add('bg-secondary');
     }
     
     updateSelectedSizesDisplay();
@@ -169,8 +157,7 @@ function updateSelectedSizesDisplay() {
     if (selectedSizes.length > 0) {
         container.style.display = 'block';
         list.innerHTML = selectedSizes.map(size => {
-            let priceText = size.price ? ` - $${parseFloat(size.price).toFixed(2)}` : '';
-            return `<span class="badge bg-primary">${size.name}${priceText}</span>`;
+            return `<span class="badge rounded-pill bg-secondary fs-6 px-3 py-2">${size.name}</span>`;
         }).join('');
         input.value = JSON.stringify(selectedSizes);
     } else {
