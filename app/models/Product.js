@@ -32,6 +32,10 @@ const productSchema = new mongoose.Schema(
       required: true,
       min: 0
     },
+    cost: {
+      type: Number,
+      min: 0
+    },
     startingAtPrice: {
       type: Number,
       min: 0

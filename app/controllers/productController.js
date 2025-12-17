@@ -145,6 +145,7 @@ exports.store = async (req, res) => {
         .replace(/(^-|-$)/g, ''),
       description,
       price: price && price.trim() ? parseFloat(price) : undefined,
+      cost: cost && cost.trim() ? parseFloat(cost) : undefined,
       startingAtPrice:
         startingAtPrice && startingAtPrice.trim()
           ? parseFloat(startingAtPrice)
@@ -200,6 +201,7 @@ exports.update = async (req, res) => {
       name,
       description,
       price,
+      cost,
       startingAtPrice,
       manufacturer,
       materials,
@@ -267,6 +269,7 @@ exports.update = async (req, res) => {
         name,
         description,
         price: price && price.trim() ? parseFloat(price) : null,
+        cost: cost && cost.trim() ? parseFloat(cost) : null,
         startingAtPrice:
           startingAtPrice && startingAtPrice.trim()
             ? parseFloat(startingAtPrice)
@@ -418,6 +421,57 @@ exports.publicShow = async (req, res) => {
   }
 }
 
+// API endpoint for creating product (returns JSON for client-side use)
+exports.createAPI = async (req, res) => {
+  try {
+    const { name, description, price, cost, sku, isTaxable, status } = req.body
+
+    if (!name || !name.trim()) {
+      return res.status(400).json({ error: 'Product name is required' })
+    }
+
+    // Generate slug from name
+    const slug = name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '')
+
+    const product = new Product({
+      name: name.trim(),
+      slug,
+      description: description ? description.trim() : '',
+      price: price ? parseFloat(price) : 0,
+      cost: cost ? parseFloat(cost) : 0,
+      sku: sku ? sku.trim() : undefined,
+      isTaxable: isTaxable === true || isTaxable === 'true',
+      status: status || 'draft',
+      isActive: true
+    })
+
+    await product.save()
+
+    // Return formatted product for frontend
+    res.json({
+      _id: product._id,
+      name: product.name,
+      sku: product.sku || '',
+      description: product.description || '',
+      price: product.price || 0,
+      cost: product.cost || 0,
+      taxable: product.isTaxable !== false
+    })
+  } catch (error) {
+    console.error('Product create API error:', error)
+    if (error.code === 11000) {
+      // Duplicate key error
+      return res
+        .status(400)
+        .json({ error: 'Product with this name or SKU already exists' })
+    }
+    res.status(500).json({ error: error.message || 'Error creating product' })
+  }
+}
+
 // API endpoint for product search (for sales line items)
 exports.search = async (req, res) => {
   try {
@@ -440,7 +494,7 @@ exports.search = async (req, res) => {
     }
 
     const products = await Product.find(searchQuery)
-      .select('_id name sku description price isTaxable')
+      .select('_id name sku description price cost isTaxable')
       .limit(limit)
       .sort({ name: 1 })
       .lean()
@@ -452,6 +506,7 @@ exports.search = async (req, res) => {
       sku: product.sku || '',
       description: product.description || '',
       price: product.price || 0,
+      cost: product.cost || 0,
       taxable: product.isTaxable !== false // Default to true
     }))
 

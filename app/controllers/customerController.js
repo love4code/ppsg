@@ -201,3 +201,4 @@ exports.delete = async (req, res) => {
     res.redirect('/admin/customers')
   }
 }
+

@@ -23,6 +23,11 @@ const saleLineItemSchema = new mongoose.Schema(
       type: Boolean,
       default: true
     },
+    cost: {
+      type: Number,
+      min: 0,
+      default: 0
+    },
     unitPrice: {
       type: Number,
       required: true,

@@ -154,6 +154,7 @@ exports.store = async (req, res) => {
           continue // Skip invalid items
         }
 
+        const cost = Math.max(0, parseFloat(item.cost) || 0)
         const unitPrice = Math.max(0, parseFloat(item.unitPrice) || 0)
         const quantity = Math.max(1, parseInt(item.quantity) || 1)
         const taxable = item.taxable === 'true' || item.taxable === true
@@ -164,6 +165,7 @@ exports.store = async (req, res) => {
           sku: item.sku ? item.sku.trim() : undefined,
           description: item.description ? item.description.trim() : '',
           taxable: taxable,
+          cost: cost,
           unitPrice: unitPrice,
           quantity: quantity
         })
@@ -184,7 +186,7 @@ exports.store = async (req, res) => {
       saleDate: saleDate ? new Date(saleDate) : new Date(),
       status: status || 'open',
       paymentStatus: paymentStatus || 'unpaid',
-      taxRate: Math.max(0, Math.min(1, parseFloat(taxRate) || 0.0625)),
+      taxRate: Math.max(0, Math.min(1, (parseFloat(taxRate) || 6.25) / 100)),
       notes: notes ? notes.trim() : '',
       lineItems: parsedLineItems
     })
@@ -255,6 +257,7 @@ exports.update = async (req, res) => {
           continue
         }
 
+        const cost = Math.max(0, parseFloat(item.cost) || 0)
         const unitPrice = Math.max(0, parseFloat(item.unitPrice) || 0)
         const quantity = Math.max(1, parseInt(item.quantity) || 1)
         const taxable = item.taxable === 'true' || item.taxable === true
@@ -265,6 +268,7 @@ exports.update = async (req, res) => {
           sku: item.sku ? item.sku.trim() : undefined,
           description: item.description ? item.description.trim() : '',
           taxable: taxable,
+          cost: cost,
           unitPrice: unitPrice,
           quantity: quantity
         })
@@ -310,15 +314,13 @@ exports.delete = async (req, res) => {
       return res.redirect('/admin/sales')
     }
 
-    // Prefer setting status to cancelled instead of deleting
-    sale.status = 'cancelled'
-    await sale.save()
+    await Sale.findByIdAndDelete(req.params.id)
 
-    req.session.success = 'Sale cancelled successfully'
+    req.session.success = 'Sale deleted successfully'
     res.redirect('/admin/sales')
   } catch (error) {
     console.error('Delete sale error:', error)
-    req.session.error = 'Error cancelling sale'
+    req.session.error = 'Error deleting sale'
     res.redirect('/admin/sales')
   }
 }

@@ -46,14 +46,14 @@
       clearTimeout(searchTimeout)
       const query = this.value.trim()
 
-      if (query.length < 2) {
+      if (query.length < 1) {
         resultsDiv.style.display = 'none'
         return
       }
 
       searchTimeout = setTimeout(() => {
         searchProducts(query)
-      }, 300)
+      }, 200)
     })
 
     // Handle manual add button click
@@ -105,16 +105,35 @@
                      product.description || ''
                    )}"
                    data-product-price="${product.price || 0}"
+                   data-product-cost="${product.cost || 0}"
                    data-product-taxable="${product.taxable}">
-                    <strong>${escapeHtml(product.name)}</strong>
-                    ${
-                      product.sku
-                        ? `<br><small class="text-muted">SKU: ${escapeHtml(
-                            product.sku
-                          )}</small>`
-                        : ''
-                    }
-                    <br><small>$${(product.price || 0).toFixed(2)}</small>
+                    <div class="d-flex justify-content-between align-items-start">
+                      <div>
+                        <strong>${escapeHtml(product.name)}</strong>
+                        ${
+                          product.sku
+                            ? `<br><small class="text-muted">SKU: ${escapeHtml(
+                                product.sku
+                              )}</small>`
+                            : ''
+                        }
+                      </div>
+                      <div class="text-end ms-3">
+                        <small class="text-muted">Cost: $${(
+                          product.cost || 0
+                        ).toFixed(2)}</small><br>
+                        <small class="text-success">Price: $${(
+                          product.price || 0
+                        ).toFixed(2)}</small>
+                        ${
+                          product.cost && product.price
+                            ? `<br><small class="text-info">Profit: $${(
+                                product.price - product.cost
+                              ).toFixed(2)}</small>`
+                            : ''
+                        }
+                      </div>
+                    </div>
                 </a>
             `
         )
@@ -130,6 +149,7 @@
             sku: this.getAttribute('data-product-sku'),
             description: this.getAttribute('data-product-description'),
             price: parseFloat(this.getAttribute('data-product-price')),
+            cost: parseFloat(this.getAttribute('data-product-cost')),
             taxable: this.getAttribute('data-product-taxable') === 'true'
           }
           selectedProduct = product
@@ -177,6 +197,11 @@
                 <input type="number" class="form-control quantity-input" name="lineItems[${lineItemIndex}][quantity]" value="1" min="1" step="1" required>
             </td>
             <td>
+                <input type="number" class="form-control cost-input" name="lineItems[${lineItemIndex}][cost]" value="${
+      product.cost || 0
+    }" min="0" step="0.01" required>
+            </td>
+            <td>
                 <input type="number" class="form-control price-input" name="lineItems[${lineItemIndex}][unitPrice]" value="${
       product.price || 0
     }" min="0" step="0.01" required>
@@ -189,6 +214,7 @@
             <td class="line-subtotal">$0.00</td>
             <td class="line-tax">$0.00</td>
             <td class="line-total"><strong>$0.00</strong></td>
+            <td class="line-profit">$0.00</td>
             <td>
                 <button type="button" class="btn btn-sm btn-outline-danger remove-line-item">
                     <i class="bi bi-trash"></i>
@@ -205,6 +231,7 @@
   // Attach event listeners to line item inputs
   function attachLineItemListeners (row) {
     const quantityInput = row.querySelector('.quantity-input')
+    const costInput = row.querySelector('.cost-input')
     const priceInput = row.querySelector('.price-input')
     const taxableCheckbox = row.querySelector('.taxable-checkbox')
     const removeBtn = row.querySelector('.remove-line-item')
@@ -215,6 +242,11 @@
         updateLineItemTotals.bind(null, row)
       )
       quantityInput.addEventListener('change', updateTotals)
+    }
+
+    if (costInput) {
+      costInput.addEventListener('input', updateLineItemTotals.bind(null, row))
+      costInput.addEventListener('change', updateTotals)
     }
 
     if (priceInput) {
@@ -242,6 +274,7 @@
   // Update totals for a single line item
   function updateLineItemTotals (row) {
     const quantity = parseFloat(row.querySelector('.quantity-input').value) || 0
+    const cost = parseFloat(row.querySelector('.cost-input')?.value) || 0
     const unitPrice = parseFloat(row.querySelector('.price-input').value) || 0
     const taxable = row.querySelector('.taxable-checkbox').checked
     const taxRate =
@@ -250,12 +283,20 @@
     const lineSubtotal = quantity * unitPrice
     const lineTax = taxable ? lineSubtotal * taxRate : 0
     const lineTotal = lineSubtotal + lineTax
+    const lineProfit = (unitPrice - cost) * quantity
 
     row.querySelector('.line-subtotal').textContent =
       '$' + lineSubtotal.toFixed(2)
     row.querySelector('.line-tax').textContent = '$' + lineTax.toFixed(2)
     row.querySelector('.line-total').innerHTML =
       '<strong>$' + lineTotal.toFixed(2) + '</strong>'
+
+    const profitCell = row.querySelector('.line-profit')
+    if (profitCell) {
+      profitCell.textContent = '$' + lineProfit.toFixed(2)
+      profitCell.className =
+        'line-profit ' + (lineProfit >= 0 ? 'text-success' : 'text-danger')
+    }
   }
 
   // Update all totals
@@ -267,29 +308,50 @@
     const taxRate = parseFloat(taxRateInput.value) / 100 || 0.0625
     let subtotal = 0
     let taxTotal = 0
+    let totalCost = 0
+    let totalProfit = 0
 
     tbody.querySelectorAll('tr').forEach(row => {
       updateLineItemTotals(row)
 
       const quantity =
         parseFloat(row.querySelector('.quantity-input').value) || 0
+      const cost = parseFloat(row.querySelector('.cost-input')?.value) || 0
       const unitPrice = parseFloat(row.querySelector('.price-input').value) || 0
       const taxable = row.querySelector('.taxable-checkbox').checked
 
       const lineSubtotal = quantity * unitPrice
       const lineTax = taxable ? lineSubtotal * taxRate : 0
+      const lineCost = cost * quantity
+      const lineProfit = (unitPrice - cost) * quantity
 
       subtotal += lineSubtotal
       taxTotal += lineTax
+      totalCost += lineCost
+      totalProfit += lineProfit
     })
 
     const total = subtotal + taxTotal
 
-    document.getElementById('previewSubtotal').textContent =
-      '$' + subtotal.toFixed(2)
-    document.getElementById('previewTaxTotal').textContent =
-      '$' + taxTotal.toFixed(2)
-    document.getElementById('previewTotal').textContent = '$' + total.toFixed(2)
+    const subtotalEl = document.getElementById('previewSubtotal')
+    const taxTotalEl = document.getElementById('previewTaxTotal')
+    const totalEl = document.getElementById('previewTotal')
+    const totalCostEl = document.getElementById('previewTotalCost')
+    const totalProfitEl = document.getElementById('previewTotalProfit')
+
+    if (subtotalEl) subtotalEl.textContent = '$' + subtotal.toFixed(2)
+    if (taxTotalEl) taxTotalEl.textContent = '$' + taxTotal.toFixed(2)
+    if (totalEl) totalEl.textContent = '$' + total.toFixed(2)
+    if (totalCostEl) {
+      totalCostEl.textContent = '$' + totalCost.toFixed(2)
+      totalCostEl.className = totalCostEl.className.replace(/text-\w+/g, '')
+    }
+    if (totalProfitEl) {
+      totalProfitEl.textContent = '$' + totalProfit.toFixed(2)
+      totalProfitEl.className = totalProfitEl.className.replace(/text-\w+/g, '')
+      totalProfitEl.className +=
+        totalProfit >= 0 ? ' text-success' : ' text-danger'
+    }
 
     // Update tax rate listener
     if (!taxRateInput.hasAttribute('data-listener-attached')) {
@@ -336,6 +398,123 @@
           return false
         }
       })
+    }
+
+    // Create product modal handlers
+    const createProductBtn = document.getElementById('saveNewProductBtn')
+    const createProductForm = document.getElementById('createProductForm')
+    const createProductModal = document.getElementById('createProductModal')
+
+    if (createProductBtn && createProductForm) {
+      createProductBtn.addEventListener('click', async function () {
+        await createAndAddProduct()
+      })
+
+      // Allow Enter key to submit
+      createProductForm.addEventListener('submit', async function (e) {
+        e.preventDefault()
+        await createAndAddProduct()
+      })
+    }
+
+    // Clear form when modal is closed
+    if (createProductModal) {
+      createProductModal.addEventListener('hidden.bs.modal', function () {
+        createProductForm.reset()
+        // Reset to defaults
+        document.getElementById('newProductCost').value = '0'
+        document.getElementById('newProductPrice').value = '0'
+        document.getElementById('newProductTaxable').checked = true
+        document.getElementById('newProductStatus').value = 'draft'
+      })
+    }
+  }
+
+  // Create product and add to line items
+  async function createAndAddProduct () {
+    const createProductBtn = document.getElementById('saveNewProductBtn')
+    const form = document.getElementById('createProductForm')
+    const modal = document.getElementById('createProductModal')
+
+    if (!form || !createProductBtn) return
+
+    // Validate form
+    if (!form.checkValidity()) {
+      form.reportValidity()
+      return
+    }
+
+    // Get form data
+    const formData = {
+      name: document.getElementById('newProductName').value.trim(),
+      description: document
+        .getElementById('newProductDescription')
+        .value.trim(),
+      sku: document.getElementById('newProductSKU').value.trim(),
+      cost: parseFloat(document.getElementById('newProductCost').value) || 0,
+      price: parseFloat(document.getElementById('newProductPrice').value) || 0,
+      isTaxable: document.getElementById('newProductTaxable').checked,
+      status: document.getElementById('newProductStatus').value
+    }
+
+    if (!formData.name) {
+      alert('Product name is required')
+      return
+    }
+
+    // Disable button and show loading
+    createProductBtn.disabled = true
+    const originalText = createProductBtn.innerHTML
+    createProductBtn.innerHTML =
+      '<span class="spinner-border spinner-border-sm me-2"></span>Creating...'
+
+    try {
+      const response = await fetch('/admin/api/products', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Error creating product')
+      }
+
+      // Product created successfully, add it to line items
+      const product = {
+        _id: data._id,
+        name: data.name,
+        sku: data.sku || '',
+        description: data.description || '',
+        price: data.price || 0,
+        cost: data.cost || 0,
+        taxable: data.taxable
+      }
+
+      // Close modal
+      const bsModal = bootstrap.Modal.getInstance(modal)
+      if (bsModal) {
+        bsModal.hide()
+      }
+
+      // Add product to line items
+      addLineItemFromProduct(product)
+
+      // Show success message
+      const searchInput = document.getElementById('productSearch')
+      if (searchInput) {
+        searchInput.value = ''
+      }
+    } catch (error) {
+      console.error('Error creating product:', error)
+      alert('Error creating product: ' + error.message)
+    } finally {
+      // Re-enable button
+      createProductBtn.disabled = false
+      createProductBtn.innerHTML = originalText
     }
   }
 

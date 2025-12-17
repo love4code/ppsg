@@ -100,6 +100,7 @@ router.delete('/sales/:id', saleController.delete)
 
 // Product API routes
 router.get('/api/products', productController.search)
+router.post('/api/products', productController.createAPI)
 
 // Settings routes
 router.get('/settings', settingsController.index)

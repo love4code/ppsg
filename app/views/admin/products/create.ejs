@@ -17,7 +17,16 @@
             </div>
 
             <div class="row">
-                <div class="col-md-4 mb-3">
+                <div class="col-md-3 mb-3">
+                    <label for="cost" class="form-label">Cost</label>
+                    <div class="input-group">
+                        <span class="input-group-text">$</span>
+                        <input type="number" class="form-control" id="cost" name="cost" step="0.01" min="0">
+                    </div>
+                    <small class="form-text text-muted">Your cost for this product</small>
+                </div>
+
+                <div class="col-md-3 mb-3">
                     <label for="price" class="form-label">Base Price (Optional)</label>
                     <div class="input-group">
                         <span class="input-group-text">$</span>
@@ -26,7 +35,7 @@
                     <small class="form-text text-muted">Leave blank if using sizes only</small>
                 </div>
 
-                <div class="col-md-4 mb-3">
+                <div class="col-md-3 mb-3">
                     <label for="isTaxable" class="form-label">Tax Status</label>
                     <div class="form-check form-switch mt-2">
                         <input class="form-check-input" type="checkbox" id="isTaxable" name="isTaxable" checked>
@@ -34,7 +43,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-4 mb-3">
+                <div class="col-md-3 mb-3">
                     <label for="status" class="form-label">Status</label>
                     <select class="form-select" id="status" name="status">
                         <option value="draft">Draft</option>

@@ -50,3 +50,4 @@ const ensureDatabaseConnected = () => {
 }
 
 module.exports = { checkDatabaseConnection, ensureDatabaseConnected }
+

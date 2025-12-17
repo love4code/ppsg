@@ -2,3 +2,4 @@
 **/*.ejs
 app/views/**/*
 views/**/*
+

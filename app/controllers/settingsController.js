@@ -38,11 +38,19 @@ exports.update = async (req, res) => {
     const { theme, customColors, hero, company, socialMedia } = req.body
 
     let settings = await Settings.findOne()
+    const isNewSettings = !settings
     if (!settings) {
       settings = new Settings()
     }
 
-    settings.theme = theme || 'default'
+    // Only update theme if it's provided in the request
+    // For new settings, default to 'default' if not provided
+    if (theme !== undefined && theme !== null && theme !== '') {
+      settings.theme = theme
+    } else if (isNewSettings) {
+      settings.theme = 'default'
+    }
+    // For existing settings, if theme is not provided, keep the existing value
 
     if (customColors) {
       settings.customColors = {

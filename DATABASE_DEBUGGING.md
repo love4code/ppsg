@@ -194,3 +194,4 @@ heroku run npm run seed
 4. Copy connection string
 5. Replace `<password>` with your actual password (URL-encoded)
 6. Update Heroku config var
+
