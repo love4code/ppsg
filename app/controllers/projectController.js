@@ -78,6 +78,7 @@ exports.store = async (req, res) => {
       mainImage,
       gallery,
       status,
+      featured,
       location,
       date,
       tags,
