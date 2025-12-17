@@ -24,6 +24,9 @@ router.get('/login', authController.showLogin)
 router.post('/login', authController.login)
 router.post('/logout', authController.logout)
 
+// Theme CSS route (publicly accessible for public pages)
+router.get('/api/theme.css', settingsController.getThemeCSS)
+
 // All admin routes require authentication
 router.use(requireAuth)
 
@@ -106,7 +109,6 @@ router.post('/api/products', productController.createAPI)
 router.get('/settings', settingsController.index)
 router.post('/settings', settingsController.update)
 router.put('/settings', settingsController.update)
-router.get('/api/theme.css', settingsController.getThemeCSS)
 
 // Diagnostic route (for debugging database issues)
 router.get('/diagnostics', async (req, res) => {
