@@ -54,12 +54,20 @@
 
             <div class="row">
                 <div class="col-md-12 mb-3">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" id="featured" name="featured" <%= product.featured ? 'checked' : '' %>>
-                        <label class="form-check-label" for="featured">
-                            <strong>Featured Product</strong> - Only featured products will be displayed on the public site
+                    <label class="form-label"><strong>Featured Product</strong></label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" id="featured_yes" name="featured" value="true" <%= product.featured ? 'checked' : '' %>>
+                        <label class="form-check-label" for="featured_yes">
+                            Featured - Display on home page
                         </label>
                     </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" id="featured_no" name="featured" value="false" <%= !product.featured ? 'checked' : '' %>>
+                        <label class="form-check-label" for="featured_no">
+                            Not Featured
+                        </label>
+                    </div>
+                    <small class="form-text text-muted">Only featured products will be displayed on the home page</small>
                 </div>
                 <div class="col-md-12 mb-3">
                     <div class="form-check form-switch">

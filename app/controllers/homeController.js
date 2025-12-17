@@ -20,10 +20,13 @@ exports.index = async (req, res) => {
       })
     }
 
-    const featuredProjects = await Project.find({ status: 'published' })
+    const featuredProjects = await Project.find({
+      status: 'published',
+      featured: true
+    })
       .populate('mainImage')
       .sort({ createdAt: -1 })
-      .limit(6)
+      .limit(3)
       .lean()
 
     const featuredServices = await Service.find({ status: 'published' })

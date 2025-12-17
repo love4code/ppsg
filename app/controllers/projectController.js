@@ -121,6 +121,7 @@ exports.store = async (req, res) => {
       mainImage: mainImage || undefined,
       gallery: galleryArray,
       status: status || 'draft',
+      featured: featured === 'true' || featured === 'on' || featured === true,
       location: location || '',
       date: date || undefined,
       tags: tags
@@ -171,6 +172,7 @@ exports.update = async (req, res) => {
       mainImage,
       gallery,
       status,
+      featured,
       location,
       date,
       tags,
@@ -212,6 +214,7 @@ exports.update = async (req, res) => {
         mainImage: mainImage || undefined,
         gallery: galleryArray,
         status: status || 'draft',
+        featured: featured === 'true' || featured === 'on' || featured === true,
         location: location || '',
         date: date || undefined,
         tags: tags
@@ -269,7 +272,7 @@ exports.publicIndex = async (req, res) => {
     }
 
     const page = parseInt(req.query.page) || 1
-    const limit = 12
+    const limit = 9
     const skip = (page - 1) * limit
 
     const projects = await Project.find({ status: 'published' })

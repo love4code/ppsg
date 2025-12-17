@@ -1,75 +1,87 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose')
 
-const projectSchema = new mongoose.Schema({
-  title: {
-    type: String,
-    required: true,
-    trim: true,
+const projectSchema = new mongoose.Schema(
+  {
+    title: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    slug: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true
+    },
+    description: {
+      type: String,
+      required: true
+    },
+    mainImage: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Media'
+    },
+    gallery: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Media'
+      }
+    ],
+    status: {
+      type: String,
+      enum: ['draft', 'published'],
+      default: 'draft'
+    },
+    featured: {
+      type: Boolean,
+      default: false
+    },
+    location: {
+      type: String,
+      default: ''
+    },
+    date: {
+      type: Date
+    },
+    tags: [
+      {
+        type: String
+      }
+    ],
+    // SEO Fields
+    metaTitle: {
+      type: String,
+      trim: true
+    },
+    metaDescription: {
+      type: String,
+      trim: true
+    },
+    keywords: [
+      {
+        type: String,
+        trim: true
+      }
+    ],
+    ogImage: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Media'
+    }
   },
-  slug: {
-    type: String,
-    required: true,
-    unique: true,
-    lowercase: true,
-  },
-  description: {
-    type: String,
-    required: true,
-  },
-  mainImage: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Media',
-  },
-  gallery: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Media',
-  }],
-  status: {
-    type: String,
-    enum: ['draft', 'published'],
-    default: 'draft',
-  },
-  location: {
-    type: String,
-    default: '',
-  },
-  date: {
-    type: Date,
-  },
-  tags: [{
-    type: String,
-  }],
-  // SEO Fields
-  metaTitle: {
-    type: String,
-    trim: true,
-  },
-  metaDescription: {
-    type: String,
-    trim: true,
-  },
-  keywords: [{
-    type: String,
-    trim: true,
-  }],
-  ogImage: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Media',
-  },
-}, {
-  timestamps: true,
-});
+  {
+    timestamps: true
+  }
+)
 
 // Generate slug from title before saving
-projectSchema.pre('save', function(next) {
+projectSchema.pre('save', function (next) {
   if (!this.slug && this.title) {
     this.slug = this.title
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
+      .replace(/(^-|-$)/g, '')
   }
-  next();
-});
+  next()
+})
 
-module.exports = mongoose.model('Project', projectSchema);
-
+module.exports = mongoose.model('Project', projectSchema)
